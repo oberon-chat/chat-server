@@ -13,6 +13,9 @@ defmodule ChatServer.Application do
       # Start your own worker by calling: ChatServer.Worker.start_link(arg1, arg2, arg3)
       # worker(ChatServer.Worker, [arg1, arg2, arg3]),
       supervisor(ChatServerWeb.Presence, []),
+      supervisor(ChatServerWeb.RoomSupervisor, [
+        [name: ChatServerWeb.RoomSupervisor]
+      ]),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
