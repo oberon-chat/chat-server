@@ -6,18 +6,33 @@ defmodule ChatServerWeb.RoomChannel do
 
   def join("room:" <> room, _, socket) do
     room_pid = find_or_start_room_server(room)
+    socket = socket
+             |> assign(:room, room)
+             |> assign(:room_pid, room_pid)
+
     send self(), :after_join
 
-    {:ok, assign(socket, :room_pid, room_pid)}
+    {:ok, socket}
   end
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list(socket)
     push socket, "message_state", Room.get_messages(socket)
 
-    Presence.track(socket, socket.assigns.user, %{
+    %{
+      room: room,
+      room_pid: room_pid,
+      user: user
+    } = socket.assigns
+
+    Presence.track(socket, user, %{
       node_name: node_name(),
       online_at: :os.system_time(:milli_seconds)
+    })
+
+    Presence.track(room_pid, "room", room, %{
+      name: room,
+      pid: room_pid
     })
 
     {:noreply, socket}
@@ -40,7 +55,7 @@ defmodule ChatServerWeb.RoomChannel do
     userCount = Presence.list(socket) |> Map.keys |> length
 
     if userCount <= 1 do
-      IO.inspect Room.stop(socket.assigns.room_pid)
+      Room.stop(socket.assigns.room_pid)
     end
   end
 

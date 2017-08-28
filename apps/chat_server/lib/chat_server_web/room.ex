@@ -1,8 +1,6 @@
 defmodule ChatServerWeb.Room do
   use GenServer
 
-  alias ChatServerWeb.Presence
-
   defstruct messages: []
 
   def start(room) do
@@ -31,8 +29,7 @@ defmodule ChatServerWeb.Room do
     GenServer.cast(pid, {:put, msg})
   end
 
-  def init(room) do
-    Presence.track(self(), "room", room, %{pid: self(), name: room})
+  def init(_room) do
     {:ok, %ChatServerWeb.Room{}}
   end
 
