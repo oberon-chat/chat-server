@@ -1,4 +1,14 @@
 defmodule ChatServerWeb.Presence do
+
+  # Custom Callbacks
+
+  # def handle_diff(diff, state) do
+  #   Phoenix.Presence.handle_diff(__MODULE__,
+  #     diff, state.node_name, state.pubsub_server, state.task_sup
+  #   )
+  #   {:ok, state}
+  # end
+
   @moduledoc """
   Provides presence tracking to channels and processes.
 

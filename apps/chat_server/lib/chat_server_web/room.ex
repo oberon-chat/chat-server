@@ -1,18 +1,20 @@
 defmodule ChatServerWeb.Room do
   use GenServer
 
+  alias ChatServerWeb.RoomSupervisor
+
   defstruct messages: []
 
   def start(room) do
-    Supervisor.start_child(ChatServerWeb.RoomSupervisor, [room])
+    Supervisor.start_child(RoomSupervisor, [room])
   end
 
   def start_link(room) do
     GenServer.start_link(__MODULE__, room)
   end
 
-  def stop(room) do
-    Supervisor.terminate_child(ChatServerWeb.RoomSupervisor, room)
+  def stop(room_pid) do
+    Supervisor.terminate_child(RoomSupervisor, room_pid)
   end
 
   def get_messages(%Phoenix.Socket{} = socket) do

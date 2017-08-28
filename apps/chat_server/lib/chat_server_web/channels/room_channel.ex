@@ -30,7 +30,11 @@ defmodule ChatServerWeb.RoomChannel do
       online_at: :os.system_time(:milli_seconds)
     })
 
-    Presence.track(room_pid, "room", room, %{
+    Presence.track(room_pid, "rooms", room, %{
+      name: room
+    })
+
+    Presence.track(room_pid, "room_pids", room, %{
       name: room,
       pid: room_pid
     })
@@ -60,7 +64,7 @@ defmodule ChatServerWeb.RoomChannel do
   end
 
   defp find_or_start_room_server(room) do
-    case Presence.list("room")[room] do
+    case Presence.list("room_pids")[room] do
       nil ->
         {:ok, pid} = Room.start(room)
         pid
