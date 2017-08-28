@@ -13,6 +13,10 @@ defmodule ChatServerWeb.Room do
     GenServer.start_link(__MODULE__, room)
   end
 
+  def stop(room) do
+    Supervisor.terminate_child(ChatServerWeb.RoomSupervisor, room)
+  end
+
   def get_messages(%Phoenix.Socket{} = socket) do
     GenServer.call(socket.assigns[:room_pid], :get)
   end

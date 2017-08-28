@@ -36,6 +36,14 @@ defmodule ChatServerWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  def terminate(_message, socket) do
+    userCount = Presence.list(socket) |> Map.keys |> length
+
+    if userCount <= 1 do
+      IO.inspect Room.stop(socket.assigns.room_pid)
+    end
+  end
+
   defp find_or_start_room_server(room) do
     case Presence.list("room")[room] do
       nil ->
