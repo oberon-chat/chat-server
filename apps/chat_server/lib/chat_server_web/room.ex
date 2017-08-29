@@ -38,6 +38,13 @@ defmodule ChatServerWeb.Room do
     GenServer.call(pid, {:update_message, message})
   end
 
+  def delete_message(%Phoenix.Socket{} = socket, message) do
+    GenServer.call(socket.assigns[:room_pid], {:delete_message, message})
+  end
+  def delete_message(pid, message) do
+    GenServer.call(pid, {:delete_message, message})
+  end
+
   def put_message(%Phoenix.Socket{} = socket, msg) do
     GenServer.cast(socket.assigns[:room_pid], {:put_message, msg})
   end
@@ -67,6 +74,12 @@ defmodule ChatServerWeb.Room do
     {:reply, %{message: updated}, %{state | messages: updated_messages}}
   end
 
+  def handle_call({:delete_message, message}, _from, %{messages: messages} = state) do
+    id = Map.get(message, "id")
+
+    {:reply, {:ok, id}, %{state | messages: remove_message(messages, id)}}
+  end
+
   def handle_cast({:put_message, message}, %{messages: messages} = state) do
     {:noreply, %{state | messages: [message | messages]}}
   end
@@ -86,6 +99,12 @@ defmodule ChatServerWeb.Room do
         true -> message
         _ -> item
       end
+    end
+  end
+
+  defp remove_message(messages, id) do
+    with message <- find_message(messages, id) do
+      messages |> List.delete(message)
     end
   end
 end

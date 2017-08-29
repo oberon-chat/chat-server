@@ -80,6 +80,15 @@ defmodule ChatServerWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  def handle_in("message:delete", message, socket) do
+    with true <- Map.get(message, "user") == socket.assigns.user,
+         {:ok, _} <- Room.delete_message(socket, message) do
+      broadcast! socket, "message:delete", message
+    end
+
+    {:noreply, socket}
+  end
+
   def terminate(_message, socket) do
     userCount = Presence.list(socket) |> Map.keys |> length
 
