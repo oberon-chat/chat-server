@@ -31,7 +31,8 @@ defmodule ChatServerWeb.RoomChannel do
     })
 
     Presence.track(room_pid, "rooms", room, %{
-      name: room
+      name: room,
+      last_message: nil
     })
 
     Presence.track(room_pid, "room_pids", room, %{
@@ -43,14 +44,38 @@ defmodule ChatServerWeb.RoomChannel do
   end
 
   def handle_in("message:new", message, socket) do
-    msg = %{
-      user: socket.assigns.user,
+    %{
+      room: room,
+      room_pid: room_pid,
+      user: user
+    } = socket.assigns
+
+    now = :os.system_time(:milli_seconds)
+
+    message = %{
+      id: UUID.uuid4(),
+      user: user,
       body: message,
-      timestamp: :os.system_time(:milli_seconds)
+      edited: false,
+      timestamp: now
     }
 
-    Room.put_message(socket, msg)
-    broadcast! socket, "message:new", msg
+    Presence.update(room_pid, "rooms", room, fn (meta) ->
+      Map.put(meta, :last_message, message)
+    end)
+
+    Room.put_message(socket, message)
+    broadcast! socket, "message:new", message
+
+    {:noreply, socket}
+  end
+
+  def handle_in("message:update", message, socket) do
+    with true <- Map.get(message, "user") == socket.assigns.user do
+      %{message: updated} = Room.update_message(socket, message)
+
+      broadcast! socket, "message:update", updated
+    end
 
     {:noreply, socket}
   end
