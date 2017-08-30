@@ -5,39 +5,26 @@ defmodule ChatServerWeb.RoomChannel do
   alias ChatServerWeb.Room
 
   def join("room:" <> room, _, socket) do
-    room_pid = find_or_start_room_server(room)
-    socket = socket
-             |> assign(:room, room)
-             |> assign(:room_pid, room_pid)
+    case find_room(room) do
+      nil -> {:error, "Room #{room} does not exist"}
+      pid -> 
+        socket = socket
+                 |> assign(:room, room)
+                 |> assign(:room_pid, pid)
 
-    send self(), :after_join
+        send self(), :after_join
 
-    {:ok, socket}
+        {:ok, socket}
+    end
   end
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list(socket)
     push socket, "message_state", Room.get_messages(socket)
 
-    %{
-      room: room,
-      room_pid: room_pid,
-      user: user
-    } = socket.assigns
-
-    Presence.track(socket, user, %{
+    Presence.track(socket, socket.assigns.user, %{
       node_name: node_name(),
       online_at: :os.system_time(:milli_seconds)
-    })
-
-    Presence.track(room_pid, "rooms", room, %{
-      name: room,
-      last_message: nil
-    })
-
-    Presence.track(room_pid, "room_pids", room, %{
-      name: room,
-      pid: room_pid
     })
 
     {:noreply, socket}
@@ -97,13 +84,17 @@ defmodule ChatServerWeb.RoomChannel do
     end
   end
 
-  defp find_or_start_room_server(room) do
-    case Presence.list("room_pids")[room] do
-      nil ->
-        {:ok, pid} = Room.start(room)
-        pid
-      %{metas: [%{pid: pid}]} ->
-        pid
+  defp find_room(room, attempt \\ 1) do
+    if attempt <= 4 do
+      case Presence.list("room_pids")[room] do
+        nil ->
+          :timer.sleep(50)
+          find_room(room, attempt + 1)
+        %{metas: [%{pid: pid}]} ->
+          pid
+      end
+    else
+      nil
     end
   end
 
