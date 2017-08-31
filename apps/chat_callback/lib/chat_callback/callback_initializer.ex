@@ -1,14 +1,16 @@
 defmodule ChatCallback.CallbackInitializer do
   use GenServer
 
-  alias ChatCallback.Callback
+  alias ChatCallback.Callback.Webhook
 
   defmodule State do
     defstruct started: []
   end
 
   def start_link do
-    callbacks = ["callback-example"]
+    callbacks = [
+      %{name: "webhook-test", topics: ["rooms"]}
+    ]
 
     GenServer.start_link(__MODULE__, callbacks)
   end
@@ -20,7 +22,8 @@ defmodule ChatCallback.CallbackInitializer do
   end
 
   defp start_callback(options) do
-    case Callback.start(options) do
+    # case Supervisor.start_child(CallbackSupervisor, [opts])
+    case Webhook.start(options) do
       {:ok, pid} -> pid
       _ -> nil
     end

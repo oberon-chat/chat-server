@@ -7,7 +7,8 @@ defmodule ChatCallback.CallbackSupervisor do
 
   def init(:ok) do
     supervise([
-      worker(ChatCallback.Callback, [], restart: :transient)
+      worker(ChatCallback.Callback.Webhook, [], restart: :transient),
+      # worker(ChatCallback.Callback, [], restart: :transient),
     ], strategy: :simple_one_for_one)
   end
 end

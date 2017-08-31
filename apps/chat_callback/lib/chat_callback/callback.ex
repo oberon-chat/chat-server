@@ -1,35 +1,77 @@
 defmodule ChatCallback.Callback do
-  use GenServer
-
-  alias ChatCallback.CallbackSupervisor
-
-  defstruct messages: []
-
-  def start(name) do
-    Supervisor.start_child(CallbackSupervisor, [name])
+  def start_link(module, opts) do
+    GenServer.start_link(module, [opts])
   end
 
-  def start_link(name) do
-    GenServer.start_link(__MODULE__, name)
-  end
+  defmacro __using__(_opts) do
+    quote location: :keep do
+      use GenServer
 
-  def stop(pid) do
-    Supervisor.terminate_child(CallbackSupervisor, pid)
-  end
+      alias ChatCallback.CallbackSupervisor
 
-  def init(_name) do
-    send self(), :init_subscribe
+      defmodule State do
+        defstruct [:id, :name, :topics]
+      end
 
-    {:ok, %ChatCallback.Callback{}}
-  end
+    	def start(opts \\ %{}) do
+      	Supervisor.start_child(CallbackSupervisor, [opts])
+    	end
 
-  def handle_info(:init_subscribe, state) do
-    ChatPubSub.subscribe "rooms"
+    	def start_link(opts \\ %{}) do
+      	GenServer.start_link(__MODULE__, [opts])
+    	end
 
-    {:noreply, state}
-  end
+    	def stop(pid) do
+      	Supervisor.terminate_child(CallbackSupervisor, pid)
+    	end
 
-  def handle_info(_message, state) do
-    {:noreply, state}
-  end
+      def subscribe(pid, topic) do
+        GenServer.call(pid, {:subscribe, topic})
+      end
+
+      def unsubscribe(pid, topic) do
+        GenServer.call(pid, {:unsubscribe, topic})
+      end
+
+      def init([opts]) do
+        send(self(), :init_subscribe)
+
+        {:ok, %State{} |> Map.merge(opts)}
+      end
+
+      def handle_call({:subscribe, topic}, _from, %State{topics: topics} = state) do
+        if topic in topics do
+          {:reply, :ok, state}
+        else
+          :ok = ChatPubSub.subscribe(topic)
+          {:reply, :ok, %{state | topics: [topic] ++ topics}}
+        end
+      end
+
+      def handle_call({:unsubscribe, topic}, _from, %State{topics: topics} = state) do
+        if topic in topics do
+          :ok = ChatPubSub.unsubscribe(topic)
+          {:reply, :ok, %{state | topics: [topic] -- topics}}
+        else
+          {:reply, :ok, state}
+        end
+      end
+
+      def handle_info(:init_subscribe, %State{topics: topics} = state) do
+        IO.puts "topics"
+        IO.inspect topics
+
+        Enum.each topics, fn topic ->
+          IO.puts "subscribing " <> topic
+          ChatPubSub.subscribe(topic)
+        end
+
+        {:noreply, state}
+      end
+
+      def handle_info(message, state) do
+        __MODULE__.deliver(message, state)
+      end
+    end
+	end
 end
