@@ -13,18 +13,6 @@ defmodule ChatCallback.Callback do
         defstruct [:id, :name, :topics]
       end
 
-    	def start(opts \\ %{}) do
-      	Supervisor.start_child(CallbackSupervisor, [opts])
-    	end
-
-    	def start_link(opts \\ %{}) do
-      	GenServer.start_link(__MODULE__, [opts])
-    	end
-
-    	def stop(pid) do
-      	Supervisor.terminate_child(CallbackSupervisor, pid)
-    	end
-
       def subscribe(pid, topic) do
         GenServer.call(pid, {:subscribe, topic})
       end
@@ -58,11 +46,7 @@ defmodule ChatCallback.Callback do
       end
 
       def handle_info(:init_subscribe, %State{topics: topics} = state) do
-        IO.puts "topics"
-        IO.inspect topics
-
         Enum.each topics, fn topic ->
-          IO.puts "subscribing " <> topic
           ChatPubSub.subscribe(topic)
         end
 
@@ -70,8 +54,8 @@ defmodule ChatCallback.Callback do
       end
 
       def handle_info(message, state) do
-        __MODULE__.deliver(message, state)
+        __MODULE__.handle(message, state)
       end
     end
-	end
+  end
 end

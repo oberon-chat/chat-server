@@ -1,8 +1,8 @@
-defmodule ChatCallback.Callback.Webhook do
+defmodule ChatCallback.Callback.Slack do
   use ChatCallback.Callback
 
   def handle(message, state) do
-    IO.puts "Webhook received:"
+    IO.puts "Slack received:"
     IO.inspect message
 
     {:noreply, state}

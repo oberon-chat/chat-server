@@ -1,6 +1,9 @@
 defmodule ChatCallback.CallbackInitializer do
   use GenServer
 
+  alias ChatCallback.CallbackSupervisor
+
+  alias ChatCallback.Callback.Slack
   alias ChatCallback.Callback.Webhook
 
   defmodule State do
@@ -9,7 +12,8 @@ defmodule ChatCallback.CallbackInitializer do
 
   def start_link do
     callbacks = [
-      %{name: "webhook-test", topics: ["rooms"]}
+      %{type: "slack", name: "slack-test", topics: ["rooms"]},
+      %{type: "webhook", name: "webhook-test", topics: ["rooms"]}
     ]
 
     GenServer.start_link(__MODULE__, callbacks)
@@ -21,11 +25,15 @@ defmodule ChatCallback.CallbackInitializer do
     {:ok, %State{started: started}}
   end
 
-  defp start_callback(options) do
-    # case Supervisor.start_child(CallbackSupervisor, [opts])
-    case Webhook.start(options) do
+  defp start_callback(opts) do
+    module = get_module(opts[:type])
+
+    case CallbackSupervisor.start_callback(module, opts) do
       {:ok, pid} -> pid
       _ -> nil
     end
   end
+
+  defp get_module("slack"), do: Slack
+  defp get_module("webhook"), do: Webhook
 end
