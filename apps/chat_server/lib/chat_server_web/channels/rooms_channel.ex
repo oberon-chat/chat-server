@@ -1,7 +1,7 @@
 defmodule ChatServerWeb.RoomsChannel do
   use Phoenix.Channel
 
-  alias ChatServerWeb.Presence
+  alias ChatPubSub.Presence
   alias ChatServerWeb.Room
 
   def join("rooms", _, socket) do
@@ -12,6 +12,12 @@ defmodule ChatServerWeb.RoomsChannel do
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", Presence.list("rooms")
+
+    {:noreply, socket}
+  end
+
+  def handle_out(event, msg, socket) do
+    push socket, event, msg
 
     {:noreply, socket}
   end

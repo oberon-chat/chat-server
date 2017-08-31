@@ -14,8 +14,7 @@ config :chat_server, ChatServerWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "/KqnRTLTZsqxxBbt0pMm2V6iS5Y5AHl9HGqLVZkMtsWZbjR/AAQ49lN6WxeuRLkl",
   render_errors: [view: ChatServerWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: ChatServer.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: ChatPubSub]
 
 # Configures Elixir's Logger
 config :logger, :console,

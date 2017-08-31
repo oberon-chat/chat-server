@@ -1,14 +1,4 @@
-defmodule ChatServerWeb.Presence do
-
-  # Custom Callbacks
-
-  # def handle_diff(diff, state) do
-  #   Phoenix.Presence.handle_diff(__MODULE__,
-  #     diff, state.node_name, state.pubsub_server, state.task_sup
-  #   )
-  #   {:ok, state}
-  # end
-
+defmodule ChatPubSub.Presence do
   @moduledoc """
   Provides presence tracking to channels and processes.
 
@@ -19,9 +9,9 @@ defmodule ChatServerWeb.Presence do
 
   Presences can be tracked in your channel after joining:
 
-      defmodule ChatServer.MyChannel do
-        use ChatServerWeb, :channel
-        alias ChatServer.Presence
+      defmodule MyApp.MyChannel do
+        use .Web, :channel
+        alias .Presence
 
         def join("some:topic", _params, socket) do
           send(self, :after_join)
@@ -29,10 +19,10 @@ defmodule ChatServerWeb.Presence do
         end
 
         def handle_info(:after_join, socket) do
-          push socket, "presence_state", Presence.list(socket)
           {:ok, _} = Presence.track(socket, socket.assigns.user_id, %{
             online_at: inspect(System.system_time(:seconds))
           })
+          push socket, "presence_state", Presence.list(socket)
           {:noreply, socket}
         end
       end
@@ -64,8 +54,12 @@ defmodule ChatServerWeb.Presence do
   to include any additional information. For example:
 
       def fetch(_topic, entries) do
-        users = entries |> Map.keys() |> Accounts.get_users_map(entries)
-        # => %{"123" => %{name: "User 123"}, "456" => %{name: nil}}
+        query =
+          from u in User,
+            where: u.id in ^Map.keys(entries),
+            select: {u.id, u}
+
+        users = query |> Repo.all |> Enum.into(%{})
 
         for {key, %{metas: metas}} <- entries, into: %{} do
           {key, %{metas: metas, user: users[key]}}
@@ -78,6 +72,5 @@ defmodule ChatServerWeb.Presence do
   information, while maintaining the required `:metas` field from the
   original presence data.
   """
-  use Phoenix.Presence, otp_app: :chat_server,
-                        pubsub_server: ChatServer.PubSub
+  use Phoenix.Presence, otp_app: :chat_pubsub, pubsub_server: ChatPubSub
 end
