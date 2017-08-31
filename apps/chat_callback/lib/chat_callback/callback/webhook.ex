@@ -1,10 +1,7 @@
 defmodule ChatCallback.Callback.Webhook do
   use ChatCallback.Callback
 
-  def handle(message, state) do
-    IO.puts "Webhook received:"
-    IO.inspect message
-
+  def handle(_message, state) do
     {:noreply, state}
   end
 end
