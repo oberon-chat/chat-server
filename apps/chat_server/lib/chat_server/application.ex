@@ -14,7 +14,7 @@ defmodule ChatServer.Application do
       # worker(ChatServer.Worker, [arg1, arg2, arg3]),
       supervisor(ChatServerWeb.RoomSupervisor, [
         [name: ChatServerWeb.RoomSupervisor]
-      ]),
+      ])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
