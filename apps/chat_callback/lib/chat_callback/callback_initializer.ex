@@ -3,6 +3,10 @@ defmodule ChatCallback.CallbackInitializer do
 
   alias ChatCallback.Callback
 
+  defmodule State do
+    defstruct started: []
+  end
+
   def start_link do
     callbacks = ["callback-example"]
 
@@ -10,12 +14,15 @@ defmodule ChatCallback.CallbackInitializer do
   end
 
   def init(callbacks) do
-    Enum.map(callbacks, &start_callback/1)
+    started = Enum.map(callbacks, &start_callback/1)
 
-    {:ok, %Callback{}}
+    {:ok, %State{started: started}}
   end
 
   defp start_callback(options) do
-    Callback.start(options)
+    case Callback.start(options) do
+      {:ok, pid} -> pid
+      _ -> nil
+    end
   end
 end
