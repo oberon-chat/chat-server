@@ -28,3 +28,6 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+config :chat_callback, :client_slack,
+  uri: "https://slack.com/api/chat.postMessage"

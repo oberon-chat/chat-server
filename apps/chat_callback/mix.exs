@@ -19,14 +19,16 @@ defmodule ChatCallback.Mixfile do
       mod: {ChatCallback, []},
       applications: [
         :logger,
-        :chat_pubsub
+        :chat_pubsub,
+        :httpoison
       ]
     ]
   end
 
   defp deps do
     [
-      {:chat_pubsub, in_umbrella: true}
+      {:chat_pubsub, in_umbrella: true},
+      {:httpoison, "~> 0.13.0"}
     ]
   end
 end
