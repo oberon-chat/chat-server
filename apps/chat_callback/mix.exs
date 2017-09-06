@@ -9,9 +9,11 @@ defmodule ChatCallback.Mixfile do
      deps_path: "../../deps",
      lockfile: "../../mix.lock",
      elixir: "~> 1.4",
+     elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     aliases: aliases()]
   end
 
   def application do
@@ -19,6 +21,8 @@ defmodule ChatCallback.Mixfile do
       mod: {ChatCallback, []},
       applications: [
         :logger,
+        :postgrex,
+        :ecto,
         :chat_pubsub,
         :httpoison
       ]
@@ -28,7 +32,16 @@ defmodule ChatCallback.Mixfile do
   defp deps do
     [
       {:chat_pubsub, in_umbrella: true},
-      {:httpoison, "~> 0.13.0"}
+      {:ecto, "~> 2.0"},
+      {:httpoison, "~> 0.13.0"},
+      {:postgrex, "~> 0.13"}
     ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp aliases do
+    ["test": ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 end

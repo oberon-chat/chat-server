@@ -1,4 +1,4 @@
-defmodule ChatCallback.Client.Slack do
+defmodule ChatCallback.SlackClient do
   use HTTPoison.Base
 
   # Example usage:
@@ -13,7 +13,7 @@ defmodule ChatCallback.Client.Slack do
   end
 
   def notify_channel(channel, event, opts \\ []) do
-    config = Keyword.get(opts, :uri) || Application.get_env(:chat_callback, :client_slack)
+    config = Keyword.get(opts, :uri) || Application.get_env(:chat_callback, :slack_client)
 
     body = [
       token: Keyword.get(opts, :token),
