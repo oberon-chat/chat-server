@@ -10,7 +10,7 @@ defmodule ChatCallback.Callback do
       alias ChatCallback.CallbackSupervisor
 
       defmodule State do
-        defstruct [:id, :name, :topics]
+        defstruct [:id, :client_opts, :name, :topics]
       end
 
       def subscribe(pid, topic) do

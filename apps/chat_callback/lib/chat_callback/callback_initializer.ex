@@ -12,8 +12,11 @@ defmodule ChatCallback.CallbackInitializer do
 
   def start_link do
     callbacks = [
-      %{type: "slack", name: "slack-test", topics: ["rooms"]},
-      %{type: "webhook", name: "webhook-test", topics: ["rooms"]}
+      %{type: "webhook", name: "webhook-test", topics: ["rooms"], client_opts: []},
+      %{type: "slack", name: "slack-test", topics: ["rooms"], client_opts: [
+        channels: ["#general", "#random", "@chrislaskey"],
+        token: "..."
+      ]}
     ]
 
     GenServer.start_link(__MODULE__, callbacks)
