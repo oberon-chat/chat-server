@@ -10,13 +10,13 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias ChatCallback.Record
-alias ChatCallback.Repo
+alias ChatWebhook.Record
+alias ChatWebhook.Repo
 
 Repo.insert!(%Record{
   user_id: "844a3183-f286-4cb3-b2e3-88cacbc80173",
-  name: "Test Slack Callback",
-  description: "Callback record for testing Slack integration",
+  name: "Test Slack Webhook",
+  description: "Webhook record for testing Slack integration",
   topics: ["rooms"],
   client_type: "slack",
   client_options: %{
@@ -27,11 +27,11 @@ Repo.insert!(%Record{
 
 Repo.insert!(%Record{
   user_id: "844a3183-f286-4cb3-b2e3-88cacbc80173",
-  name: "Test HTTP Callback",
-  description: "Callback record for testing HTTP integration",
+  name: "Test HTTP Webhook",
+  description: "Webhook record for testing HTTP integration",
   topics: ["rooms"],
   client_type: "http",
   client_options: %{
-    uri: "https://chat.dev/callbacks"
+    uri: "https://chat.dev/webhook/callback"
   }
 })

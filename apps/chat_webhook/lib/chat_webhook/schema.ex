@@ -1,4 +1,4 @@
-defmodule ChatCallback.Schema do
+defmodule ChatWebhook.Schema do
   defmacro __using__(_opts) do
     quote do
       use Ecto.Schema
@@ -7,7 +7,7 @@ defmodule ChatCallback.Schema do
       import Ecto.Changeset
       import Ecto.Query
 
-      alias ChatCallback.Repo
+      alias ChatWebhook.Repo
 
       @primary_key {:id, :binary_id, autogenerate: true}
       @foreign_key_type :binary_id

@@ -1,8 +1,8 @@
-defmodule ChatCallback.Mixfile do
+defmodule ChatWebhook.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :chat_callback,
+    [app: :chat_webhook,
      version: "0.1.0",
      build_path: "../../_build",
      config_path: "../../config/config.exs",
@@ -18,7 +18,7 @@ defmodule ChatCallback.Mixfile do
 
   def application do
     [
-      mod: {ChatCallback, []},
+      mod: {ChatWebhook, []},
       applications: [
         :logger,
         :postgrex,

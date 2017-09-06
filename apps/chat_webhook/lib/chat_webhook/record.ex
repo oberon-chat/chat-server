@@ -1,5 +1,5 @@
-defmodule ChatCallback.Record do
-  use ChatCallback.Schema
+defmodule ChatWebhook.Record do
+  use ChatWebhook.Schema
 
   schema "records" do
     field :user_id, :binary_id

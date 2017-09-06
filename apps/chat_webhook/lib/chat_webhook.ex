@@ -1,13 +1,13 @@
-defmodule ChatCallback do
+defmodule ChatWebhook do
   use Application
 
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
-      supervisor(ChatCallback.Repo, []),
-      supervisor(ChatCallback.CallbackSupervisor, []),
-      worker(ChatCallback.CallbackInitializer, [], restart: :transient)
+      supervisor(ChatWebhook.Repo, []),
+      supervisor(ChatWebhook.WebhookSupervisor, []),
+      worker(ChatWebhook.WebhookInitializer, [], restart: :transient)
     ]
 
     opts = [strategy: :one_for_one, name: __MODULE__]

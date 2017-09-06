@@ -1,18 +1,18 @@
-defmodule ChatCallback.Callback do
+defmodule ChatWebhook.Webhook do
   def start_link(record) do
     module = get_module(record.client_type)
 
     GenServer.start_link(module, [Map.from_struct(record)])
   end
 
-  defp get_module("http"), do: ChatCallback.Callback.Http
-  defp get_module("slack"), do: ChatCallback.Callback.Slack
+  defp get_module("http"), do: ChatWebhook.Webhook.Http
+  defp get_module("slack"), do: ChatWebhook.Webhook.Slack
 
   defmacro __using__(_opts) do
     quote location: :keep do
       use GenServer
 
-      alias ChatCallback.CallbackSupervisor
+      alias ChatWebhook.WebhookSupervisor
 
       defmodule State do
         defstruct [:id, :client_options, :name, :topics]

@@ -1,4 +1,4 @@
-defmodule ChatCallback.Repo.Migrations.CreateCallbacks do
+defmodule ChatWebhook.Repo.Migrations.CreateWebhooks do
   use Ecto.Migration
 
   def change do

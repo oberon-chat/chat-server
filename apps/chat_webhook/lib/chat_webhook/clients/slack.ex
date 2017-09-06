@@ -1,10 +1,10 @@
-defmodule ChatCallback.SlackClient do
+defmodule ChatWebhook.SlackClient do
   use HTTPoison.Base
 
   # Example usage:
   #   event = [user: "George", text: "Room created"]
   #   opts = [channels: ["#general", "#random"], token: "<oauth_token>"]
-  #   ChatCallback.Client.Slack.notify(event, opts)
+  #   ChatWebhook.Client.Slack.notify(event, opts)
 
   def notify(event, opts \\ []) do
     channels = Map.get(opts, "channels", [])
@@ -13,7 +13,7 @@ defmodule ChatCallback.SlackClient do
   end
 
   def notify_channel(channel, event, opts \\ []) do
-    config = Map.get(opts, "uri") || Application.get_env(:chat_callback, :slack_client)
+    config = Map.get(opts, "uri") || Application.get_env(:chat_webhook, :slack_client)
 
     body = [
       token: Map.get(opts, "token"),
