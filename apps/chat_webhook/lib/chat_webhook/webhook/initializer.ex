@@ -2,7 +2,7 @@ defmodule ChatWebhook.WebhookInitializer do
   use GenServer
 
   alias ChatWebhook.WebhookSupervisor
-  alias ChatWebhook.Record
+  alias ChatWebhook.Callback
   alias ChatWebhook.Repo
 
   defmodule State do
@@ -10,19 +10,19 @@ defmodule ChatWebhook.WebhookInitializer do
   end
 
   def start_link do
-    records = Repo.all(Record)
+    callbacks = Repo.all(Callback)
 
-    GenServer.start_link(__MODULE__, records)
+    GenServer.start_link(__MODULE__, callbacks)
   end
 
-  def init(records) do
-    started = Enum.map(records, &start_webhook/1)
+  def init(callbacks) do
+    started = Enum.map(callbacks, &start_webhook/1)
 
     {:ok, %State{started: started}}
   end
 
-  defp start_webhook(record) do
-    case WebhookSupervisor.start_webhook(record) do
+  defp start_webhook(callback) do
+    case WebhookSupervisor.start_webhook(callback) do
       {:ok, pid} -> pid
       _ -> nil
     end

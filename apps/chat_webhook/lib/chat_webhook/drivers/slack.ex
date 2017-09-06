@@ -1,10 +1,9 @@
-defmodule ChatWebhook.SlackClient do
+defmodule ChatWebhook.SlackDriver do
   use HTTPoison.Base
 
   # Example usage:
   #   event = [user: "George", text: "Room created"]
   #   opts = [channels: ["#general", "#random"], token: "<oauth_token>"]
-  #   ChatWebhook.Client.Slack.notify(event, opts)
 
   def notify(event, opts \\ []) do
     channels = Map.get(opts, "channels", [])

@@ -1,7 +1,7 @@
-defmodule ChatWebhook.Record do
+defmodule ChatWebhook.Callback do
   use ChatWebhook.Schema
 
-  schema "records" do
+  schema "callbacks" do
     field :user_id, :binary_id
     field :active, :boolean, default: true
     field :name, :string

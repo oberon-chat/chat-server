@@ -2,7 +2,7 @@ defmodule ChatWebhook.Repo.Migrations.CreateWebhooks do
   use Ecto.Migration
 
   def change do
-    create table(:records, primary_key: false) do
+    create table(:callbacks, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :user_id, :binary_id
       add :active, :boolean
@@ -15,9 +15,9 @@ defmodule ChatWebhook.Repo.Migrations.CreateWebhooks do
       timestamps()
     end
 
-    create index(:records, [:id])
-    create index(:records, [:user_id])
+    create index(:callbacks, [:id])
+    create index(:callbacks, [:user_id])
 
-    execute "CREATE INDEX client_options_index ON records USING gin(client_options jsonb_path_ops);"
+    execute "CREATE INDEX client_options_index ON callbacks USING gin(client_options jsonb_path_ops);"
   end
 end

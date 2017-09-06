@@ -4,7 +4,7 @@ defmodule ChatWebhook.Webhook.Slack do
   def handle(%{event: "presence_diff"} = message, state) do
     event = [text: "Room created", user: "Unknown"]
 
-    ChatWebhook.SlackClient.notify(event, state.client_options)
+    ChatWebhook.SlackDriver.notify(event, state.client_options)
 
     {:noreply, state}
   end

@@ -11,7 +11,7 @@ defmodule ChatWebhook.WebhookSupervisor do
     ], strategy: :simple_one_for_one)
   end
 
-  def start_webhook(record) do
-    Supervisor.start_child(__MODULE__, [record])
+  def start_webhook(callback) do
+    Supervisor.start_child(__MODULE__, [callback])
   end
 end

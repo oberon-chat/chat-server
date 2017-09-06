@@ -1,8 +1,8 @@
 defmodule ChatWebhook.Webhook do
-  def start_link(record) do
-    module = get_module(record.client_type)
+  def start_link(callback) do
+    module = get_module(callback.client_type)
 
-    GenServer.start_link(module, [Map.from_struct(record)])
+    GenServer.start_link(module, [Map.from_struct(callback)])
   end
 
   defp get_module("http"), do: ChatWebhook.Webhook.Http
