@@ -7,16 +7,16 @@ defmodule ChatCallback.SlackClient do
   #   ChatCallback.Client.Slack.notify(event, opts)
 
   def notify(event, opts \\ []) do
-    channels = Keyword.get(opts, :channels, [])
+    channels = Map.get(opts, "channels", [])
 
     for channel <- channels, do: notify_channel(channel, event, opts)
   end
 
   def notify_channel(channel, event, opts \\ []) do
-    config = Keyword.get(opts, :uri) || Application.get_env(:chat_callback, :slack_client)
+    config = Map.get(opts, "uri") || Application.get_env(:chat_callback, :slack_client)
 
     body = [
-      token: Keyword.get(opts, :token),
+      token: Map.get(opts, "token"),
       channel: channel,
       attachments: attachment(event)
     ]

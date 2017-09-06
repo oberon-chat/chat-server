@@ -1,7 +1,12 @@
 defmodule ChatCallback.Callback do
-  def start_link(module, opts) do
-    GenServer.start_link(module, [opts])
+  def start_link(record) do
+    module = get_module(record.client_type)
+
+    GenServer.start_link(module, [Map.from_struct(record)])
   end
+
+  defp get_module("http"), do: ChatCallback.Callback.Http
+  defp get_module("slack"), do: ChatCallback.Callback.Slack
 
   defmacro __using__(_opts) do
     quote location: :keep do
@@ -10,7 +15,7 @@ defmodule ChatCallback.Callback do
       alias ChatCallback.CallbackSupervisor
 
       defmodule State do
-        defstruct [:id, :client_opts, :name, :topics]
+        defstruct [:id, :client_options, :name, :topics]
       end
 
       def subscribe(pid, topic) do

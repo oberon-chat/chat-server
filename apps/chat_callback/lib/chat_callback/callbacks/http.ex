@@ -1,4 +1,4 @@
-defmodule ChatCallback.Callback.Webhook do
+defmodule ChatCallback.Callback.Http do
   use ChatCallback.Callback
 
   def handle(_message, state) do

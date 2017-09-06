@@ -5,6 +5,7 @@ defmodule ChatCallback do
     import Supervisor.Spec, warn: false
 
     children = [
+      supervisor(ChatCallback.Repo, []),
       supervisor(ChatCallback.CallbackSupervisor, []),
       worker(ChatCallback.CallbackInitializer, [], restart: :transient)
     ]
