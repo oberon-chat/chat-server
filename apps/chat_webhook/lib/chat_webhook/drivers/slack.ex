@@ -12,7 +12,7 @@ defmodule ChatWebhook.SlackDriver do
   end
 
   def notify_channel(channel, event, opts \\ []) do
-    config = Map.get(opts, "uri") || Application.get_env(:chat_webhook, :slack_client)
+    uri = Map.get(opts, "uri") || Application.get_env(:chat_webhook, :slack_client)[:uri]
 
     body = [
       token: Map.get(opts, "token"),
@@ -20,7 +20,7 @@ defmodule ChatWebhook.SlackDriver do
       attachments: attachment(event)
     ]
 
-    post(config[:uri], body)
+    post(uri, body)
   end
 
   defp attachment(event) do

@@ -32,6 +32,6 @@ Repo.insert!(%Callback{
   topics: ["rooms"],
   client_type: "http",
   client_options: %{
-    uri: "https://chat.dev/webhook/callback"
+    uri: "http://chat.dev/webhook/callback"
   }
 })
