@@ -50,6 +50,7 @@ defmodule ChatServerWeb.RoomChannel do
       user: user,
       body: message,
       edited: false,
+      room: room,
       timestamp: now
     }
 
