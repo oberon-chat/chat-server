@@ -58,7 +58,7 @@ defmodule ChatServerWeb.RoomChannel do
     end)
 
     Room.create_message(socket, message)
-    broadcast! socket, "message:create", message
+    broadcast! socket, "message:created", message
 
     {:noreply, socket}
   end

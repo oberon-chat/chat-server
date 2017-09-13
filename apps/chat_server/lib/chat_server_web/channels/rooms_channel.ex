@@ -32,12 +32,17 @@ defmodule ChatServerWeb.RoomsChannel do
     case Presence.list("room_pids")[room] do
       nil ->
         with {:ok, pid} <- Room.start(room),
+             :ok <- broadcast_creation(room),
              :ok <- track_room(room, pid) do
           pid
         end
       %{metas: [%{pid: pid}]} ->
         pid
     end
+  end
+
+  defp broadcast_creation(room) do
+    ChatPubSub.broadcast! "rooms", "room:created", %{room: room}
   end
 
   defp track_room(room, pid) do

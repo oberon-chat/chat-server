@@ -71,16 +71,22 @@ defmodule ChatServerWeb.Room do
     updated = %{ current | body: body, edited: true }
     updated_messages = replace_message(messages, updated, id)
 
+    ChatPubSub.broadcast! "rooms", "message:updated", updated
+
     {:reply, %{message: updated}, %{state | messages: updated_messages}}
   end
 
   def handle_call({:delete_message, message}, _from, %{messages: messages} = state) do
     id = Map.get(message, "id")
 
+    ChatPubSub.broadcast! "rooms", "message:deleted", message
+
     {:reply, {:ok, id}, %{state | messages: remove_message(messages, id)}}
   end
 
   def handle_cast({:create_message, message}, %{messages: messages} = state) do
+    ChatPubSub.broadcast! "rooms", "message:created", message
+
     {:noreply, %{state | messages: [message | messages]}}
   end
 
