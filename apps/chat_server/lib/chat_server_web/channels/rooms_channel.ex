@@ -22,7 +22,7 @@ defmodule ChatServerWeb.RoomsChannel do
     {:noreply, socket}
   end
 
-  def handle_in("rooms:new", room, socket) do
+  def handle_in("rooms:create", room, socket) do
     find_or_start_room(room)
 
     {:noreply, socket}

@@ -36,7 +36,7 @@ defmodule ChatServerWeb.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("message:new", message, socket) do
+  def handle_in("message:create", message, socket) do
     %{
       room: room,
       room_pid: room_pid,
@@ -57,8 +57,8 @@ defmodule ChatServerWeb.RoomChannel do
       Map.put(meta, :last_message, message)
     end)
 
-    Room.put_message(socket, message)
-    broadcast! socket, "message:new", message
+    Room.create_message(socket, message)
+    broadcast! socket, "message:create", message
 
     {:noreply, socket}
   end

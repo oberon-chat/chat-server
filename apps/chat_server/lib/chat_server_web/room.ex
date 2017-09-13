@@ -45,11 +45,11 @@ defmodule ChatServerWeb.Room do
     GenServer.call(pid, {:delete_message, message})
   end
 
-  def put_message(%Phoenix.Socket{} = socket, msg) do
-    GenServer.cast(socket.assigns[:room_pid], {:put_message, msg})
+  def create_message(%Phoenix.Socket{} = socket, msg) do
+    GenServer.cast(socket.assigns[:room_pid], {:create_message, msg})
   end
-  def put_message(pid, msg) do
-    GenServer.cast(pid, {:put_message, msg})
+  def create_message(pid, msg) do
+    GenServer.cast(pid, {:create_message, msg})
   end
 
   def init(_room) do
@@ -80,7 +80,7 @@ defmodule ChatServerWeb.Room do
     {:reply, {:ok, id}, %{state | messages: remove_message(messages, id)}}
   end
 
-  def handle_cast({:put_message, message}, %{messages: messages} = state) do
+  def handle_cast({:create_message, message}, %{messages: messages} = state) do
     {:noreply, %{state | messages: [message | messages]}}
   end
 
