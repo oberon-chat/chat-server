@@ -1,4 +1,6 @@
 defmodule ChatServerWeb.UserSocket do
+  require Logger
+
   use Phoenix.Socket
 
   ## Channels
@@ -21,6 +23,7 @@ defmodule ChatServerWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(%{"user" => user}, socket) do
+    Logger.debug "Socket connection for user " <> inspect(user)
     {:ok, assign(socket, :user, user)}
   end
   def connect(_params, socket) do
