@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+export MIX_ENV=test
+source .envrc && mix do ecto.create, ecto.migrate, test
