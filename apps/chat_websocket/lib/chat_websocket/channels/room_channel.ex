@@ -3,6 +3,7 @@ defmodule ChatWebsocket.RoomChannel do
 
   alias ChatPubSub.Presence
   alias ChatServer.Room
+  alias ChatServer.Schema.Message
 
   def join("room:" <> room, _, socket) do
     case find_room(room) do
@@ -37,29 +38,29 @@ defmodule ChatWebsocket.RoomChannel do
   end
 
   def handle_in("message:create", message, socket) do
-    %{
-      room: room,
-      room_pid: room_pid,
-      user: user
-    } = socket.assigns
+    with {:ok, message} <- Message.create(%{ body: message }) do
+      %{
+        room: room,
+        room_pid: room_pid,
+        user: user
+      } = socket.assigns
 
-    now = :os.system_time(:milli_seconds)
+      message = %{
+        id: message.id,
+        user: user,
+        body: message.body,
+        edited: message.edited,
+        room: room,
+        timestamp: message.inserted_at
+      }
 
-    message = %{
-      id: UUID.uuid4(),
-      user: user,
-      body: message,
-      edited: false,
-      room: room,
-      timestamp: now
-    }
+      Presence.update(room_pid, "rooms", room, fn (meta) ->
+        Map.put(meta, :last_message, message)
+      end)
 
-    Presence.update(room_pid, "rooms", room, fn (meta) ->
-      Map.put(meta, :last_message, message)
-    end)
-
-    Room.create_message(socket, message)
-    broadcast! socket, "message:created", message
+      Room.create_message(socket, message)
+      broadcast! socket, "message:created", message
+    end
 
     {:noreply, socket}
   end
