@@ -6,8 +6,15 @@
 use Mix.Config
 
 # General application configuration
-config :chat_server,
-  namespace: ChatServer
+config :chat_websocket,
+  namespace: ChatWebsocket
+
+# Configures the endpoint
+config :chat_websocket, ChatWebsocket.Endpoint,
+  url: [host: "localhost"],
+  secret_key_base: "/KqnRTLTZsqxxBbt0pMm2V6iS5Y5AHl9HGqLVZkMtsWZbjR/AAQ49lN6WxeuRLkl",
+  render_errors: [view: ChatWebsocket.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: ChatPubSub]
 
 # Configures Elixir's Logger
 config :logger, :console,
