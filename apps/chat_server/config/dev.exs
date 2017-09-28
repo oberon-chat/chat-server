@@ -1,8 +1,12 @@
 use Mix.Config
 
-# Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+# Do not include metadata in development logs
+config :logger, :console, format: "$time [$level] $message\n"
 
-# Set a higher stacktrace during development. Avoid configuring such
-# in production as building large stacktraces may be expensive.
-config :phoenix, :stacktrace_depth, 20
+config :chat_server, ChatServer.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  hostname: System.get_env("CHAT_SERVER_POSTGRES_HOST"),
+  username: System.get_env("CHAT_SERVER_POSTGRES_USER"),
+  password: System.get_env("CHAT_SERVER_POSTGRES_PASS"),
+  database: System.get_env("CHAT_SERVER_POSTGRES_DB"),
+  pool_size: 10

@@ -5,12 +5,13 @@ defmodule ChatServer.Application do
     import Supervisor.Spec
 
     children = [
+      supervisor(ChatServer.Repo, []),
       supervisor(ChatServer.RoomSupervisor, [
         [name: ChatServer.RoomSupervisor]
       ])
     ]
 
-    opts = [strategy: :one_for_one, name: ChatServer.Supervisor]
+    opts = [strategy: :one_for_one, name: __MODULE__]
     Supervisor.start_link(children, opts)
   end
 end

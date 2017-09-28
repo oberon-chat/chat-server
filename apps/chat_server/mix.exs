@@ -13,7 +13,8 @@ defmodule ChatServer.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env),
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -22,6 +23,8 @@ defmodule ChatServer.Mixfile do
       mod: {ChatServer.Application, []},
       applications: [
         :logger,
+        :postgrex,
+        :ecto,
         :chat_pubsub
       ]
     ]
@@ -30,10 +33,15 @@ defmodule ChatServer.Mixfile do
   defp deps do
     [
       {:chat_pubsub, in_umbrella: true},
-      {:uuid, "~> 1.1"}
+      {:ecto, "~> 2.0"},
+      {:postgrex, "~> 0.13"}
     ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp aliases do
+    ["test": ["ecto.create --quiet", "ecto.migrate", "test"]]
+  end
 end

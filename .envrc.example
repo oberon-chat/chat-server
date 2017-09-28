@@ -1,5 +1,10 @@
 export CHAT_SERVER_PORT=4040
 
+export CHAT_SERVER_POSTGRES_HOST=localhost
+export CHAT_SERVER_POSTGRES_USER=postgres
+export CHAT_SERVER_POSTGRES_PASS=postgres
+export CHAT_SERVER_POSTGRES_DB=chat_server
+
 export CHAT_WEBHOOK_POSTGRES_HOST=localhost
 export CHAT_WEBHOOK_POSTGRES_USER=postgres
 export CHAT_WEBHOOK_POSTGRES_PASS=postgres
