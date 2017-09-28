@@ -11,6 +11,10 @@ defmodule ChatServer.Schema do
 
       @primary_key {:id, :binary_id, autogenerate: true}
       @foreign_key_type :binary_id
+
+      def preload(resource, includes) do
+        ChatServer.Repo.preload(resource, includes)
+      end
     end
   end
 end
