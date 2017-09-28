@@ -1,4 +1,4 @@
-# Oberon - Server
+# Oberon Server
 
 ## Development
 
