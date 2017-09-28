@@ -20,5 +20,5 @@ To start the Oberon chat server:
 1. Start the server `bin/start`.
 
 1. To ensure client websocket connections work correctly, configure a DNS
-   service to route traffic from `localhost:4040` to `chat.dev`. We recommend
-   using [puma-dev](https://github.com/puma/puma-dev).
+   service to route traffic from `localhost:4040` to `chat-server.dev`. We
+   recommend using [puma-dev](https://github.com/puma/puma-dev).
