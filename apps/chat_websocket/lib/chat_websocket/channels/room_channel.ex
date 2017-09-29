@@ -4,13 +4,14 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatPubSub.Presence
   alias ChatServer.Room
   alias ChatServer.Schema.Message
+  alias ChatServer.TrackRooms
 
-  def join("room:" <> room, _, socket) do
-    case find_room(room) do
-      nil -> {:error, "Room #{room} does not exist"}
+  def join("room:" <> key, _, socket) do
+    case TrackRooms.get_pid(key) do
+      nil -> {:error, "Room #{key} does not exist"}
       pid -> 
         socket = socket
-                 |> assign(:room, room)
+                 |> assign(:room, key)
                  |> assign(:room_pid, pid)
 
         send self(), :after_join
@@ -84,28 +85,6 @@ defmodule ChatWebsocket.RoomChannel do
     end
 
     {:noreply, socket}
-  end
-
-  # def terminate(_message, socket) do
-  #   userCount = Presence.list(socket) |> Map.keys |> length
-
-  #   if userCount <= 1 do
-  #     Room.stop(socket.assigns.room_pid)
-  #   end
-  # end
-
-  defp find_room(room, attempt \\ 1) do
-    if attempt <= 4 do
-      case Presence.list("room_pids")[room] do
-        nil ->
-          :timer.sleep(50)
-          find_room(room, attempt + 1)
-        %{metas: [%{pid: pid}]} ->
-          pid
-      end
-    else
-      nil
-    end
   end
 
   defp node_name do

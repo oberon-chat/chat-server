@@ -1,14 +1,14 @@
 defmodule ChatServer.StartRoom do
   require Logger
 
-  alias ChatPubSub.Presence
   alias ChatServer.Event
   alias ChatServer.Room
+  alias ChatServer.TrackRooms
 
   def call(room) do
     Logger.info "Starting room #{room.name} (#{room.id})"
 
-    with {:ok, pid} <- Room.start(room.name),
+    with {:ok, pid} <- Room.start(room),
          :ok <- broadcast_start(room, pid),
          :ok <- track_room(room, pid) do
       {:ok, pid}
@@ -24,16 +24,11 @@ defmodule ChatServer.StartRoom do
   end
 
   defp track_room(room, pid) do
-    Presence.track(pid, "rooms", room.name, %{
-      name: room.name,
-      last_message: nil
-    })
-
-    Presence.track(pid, "room_pids", room.name, %{
-      name: room.name,
-      pid: pid
-    })
-
-    :ok
+    with {:ok, _} <- TrackRooms.track(pid, room),
+         {:ok, _} <- TrackRooms.track_pid(pid, room) do
+      :ok
+    else
+      _ -> :error
+    end
   end
 end

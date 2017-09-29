@@ -4,15 +4,15 @@ defmodule ChatServer.Room do
   alias ChatServer.RoomSupervisor
 
   defmodule State do
-    defstruct [:name, messages: []]
+    defstruct [:room, messages: []]
   end
 
-  def start(name) do
-    Supervisor.start_child(RoomSupervisor, [name])
+  def start(room) do
+    Supervisor.start_child(RoomSupervisor, [room])
   end
 
-  def start_link(name, opts \\ []) do
-    GenServer.start_link(__MODULE__, name, opts)
+  def start_link(room, opts \\ []) do
+    GenServer.start_link(__MODULE__, room, opts)
   end
 
   def stop(room_pid) do
@@ -65,12 +65,12 @@ defmodule ChatServer.Room do
     GenServer.cast(pid, {:create_message, msg})
   end
 
-  def init(name) do
-    {:ok, %State{name: name}}
+  def init(room) do
+    {:ok, %State{room: room}}
   end
 
-  def handle_call({:get_name}, _from, %{name: name} = state) do
-    {:reply, %{name: name}, state}
+  def handle_call({:get_name}, _from, %{room: room} = state) do
+    {:reply, %{name: room.name}, state}
   end
 
   def handle_call({:get_message, id}, _from, %{messages: messages} = state) do
