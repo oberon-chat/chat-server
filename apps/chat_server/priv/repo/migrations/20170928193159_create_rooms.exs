@@ -6,6 +6,7 @@ defmodule ChatServer.Repo.Migrations.CreateRooms do
       add :id, :binary_id, primary_key: true
       add :type, :string
       add :status, :string
+      add :slug, :string
       add :name, :string
       timestamps()
     end

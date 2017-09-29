@@ -9,15 +9,15 @@ defmodule ChatServer.Schema.RoomTest do
   end
 
   describe "changeset" do
-    test "valid lowercase name" do
-      params = %{name: "hello"}
+    test "valid name" do
+      params = %{name: "Hello"}
       changeset = Room.changeset(%Room{}, params)
 
       assert changeset.valid? == true
     end
 
     test "it receives a default status and type from the schema definition" do
-      params = %{name: "hello"}
+      params = %{name: "Hello"}
       changeset = Room.changeset(%Room{}, params)
 
       assert changeset.data.status == "active"
@@ -26,11 +26,11 @@ defmodule ChatServer.Schema.RoomTest do
   end
 
   describe "changeset - transformations" do
-    test "name gets downcased" do
+    test "name keeps case" do
       params = %{name: "HELLO"}
       changeset = Room.changeset(%Room{}, params)
 
-      assert changeset.changes.name == "hello"
+      assert changeset.changes.name == "HELLO"
     end
 
     test "status gets downcased" do
@@ -45,6 +45,29 @@ defmodule ChatServer.Schema.RoomTest do
       changeset = Room.changeset(%Room{}, params)
 
       assert changeset.changes.type == "persistent"
+    end
+
+    test "creates a slug" do
+      params = %{name: "Hello World"}
+      changeset = Room.changeset(%Room{}, params)
+
+      assert changeset.changes.slug == "helloworld"
+    end
+
+    test "slug is not changed on update" do
+      {:ok, room} = %Room{}
+        |> Room.changeset(%{name: "Hello"})
+        |> Repo.insert
+
+      assert room.name == "Hello"
+      assert room.slug == "hello"
+
+      {:ok, room} = room
+        |> Room.changeset(%{name: "World"})
+        |> Repo.update
+
+      assert room.name == "World"
+      assert room.slug == "hello"
     end
   end
 
