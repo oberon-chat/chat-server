@@ -5,14 +5,14 @@ defmodule ChatServer.TrackRooms do
   @presence_pids_key "room_pids"
 
   def track(pid, room) do
-    Presence.track(pid, @presence_rooms_key, room.name, %{
+    Presence.track(pid, @presence_rooms_key, key(room), %{
       name: room.name,
       last_message: nil
     })
   end
 
   def track_pid(pid, room) do
-    Presence.track(pid, @presence_pids_key, room.name, %{
+    Presence.track(pid, @presence_pids_key, key(room), %{
       name: room.name,
       pid: pid
     })
@@ -20,7 +20,17 @@ defmodule ChatServer.TrackRooms do
 
   def list, do: Presence.list(@presence_rooms_key)
 
-  def get_pid(key), do: get_room_pid(key)
+  def get_pid(room), do: get_room_pid(key(room))
+
+  def update(room, values), do: update(get_pid(room), room, values)
+
+  def update(pid, room, values) do
+    Presence.update(pid, @presence_rooms_key, key(room), fn (meta) ->
+      Map.merge(meta, values)
+    end)
+  end
+
+  defp key(room), do: room.name
 
   defp get_room_pid(key, attempt \\ 1) do
     if attempt <= 4 do
@@ -36,4 +46,3 @@ defmodule ChatServer.TrackRooms do
     end
   end
 end
-

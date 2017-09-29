@@ -1,33 +1,30 @@
 defmodule ChatWebsocket.RoomChannel do
   use Phoenix.Channel
 
-  alias ChatPubSub.Presence
   alias ChatServer.Room
-  alias ChatServer.Schema.Message
+  alias ChatServer.Schema
   alias ChatServer.TrackRooms
+  alias ChatServer.TrackRoomUsers
 
-  def join("room:" <> key, _, socket) do
-    case TrackRooms.get_pid(key) do
-      nil -> {:error, "Room #{key} does not exist"}
-      pid -> 
+  def join("room:" <> name, _, socket) do
+    case Schema.Room.get_by(:name, name) do
+      nil -> {:error, "Room #{name} does not exist"}
+      room ->
         socket = socket
-                 |> assign(:room, key)
-                 |> assign(:room_pid, pid)
+          |> assign(:room, room)
+          |> assign(:room_pid, TrackRooms.get_pid(room))
 
         send self(), :after_join
 
-        {:ok, socket}
+        {:ok, assign(socket, :room, room)}
     end
   end
 
   def handle_info(:after_join, socket) do
-    push socket, "presence_state", Presence.list(socket)
-    push socket, "message_state", Room.get_messages(socket)
+    TrackRoomUsers.track(socket, socket.assigns.user)
 
-    Presence.track(socket, socket.assigns.user.name, %{
-      node_name: node_name(),
-      online_at: :os.system_time(:milli_seconds)
-    })
+    push socket, "presence_state", TrackRoomUsers.list(socket)
+    push socket, "message_state", Room.get_messages(socket)
 
     {:noreply, socket}
   end
@@ -39,10 +36,9 @@ defmodule ChatWebsocket.RoomChannel do
   end
 
   def handle_in("message:create", message, socket) do
-    with {:ok, message} <- Message.create(%{ body: message }) do
+    with {:ok, message} <- Schema.Message.create(%{ body: message }) do
       %{
         room: room,
-        room_pid: room_pid,
         user: %{
           name: name
         }
@@ -53,13 +49,11 @@ defmodule ChatWebsocket.RoomChannel do
         user: name,
         body: message.body,
         edited: message.edited,
-        room: room,
+        room: room.name,
         timestamp: message.inserted_at
       }
 
-      Presence.update(room_pid, "rooms", room, fn (meta) ->
-        Map.put(meta, :last_message, message)
-      end)
+      TrackRooms.update(room, %{last_message: message})
 
       Room.create_message(socket, message)
       broadcast! socket, "message:created", message
@@ -85,12 +79,5 @@ defmodule ChatWebsocket.RoomChannel do
     end
 
     {:noreply, socket}
-  end
-
-  defp node_name do
-    node()
-    |> Atom.to_string()
-    |> String.split("@")
-    |> List.first()
   end
 end
