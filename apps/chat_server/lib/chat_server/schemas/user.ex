@@ -1,10 +1,47 @@
 defmodule ChatServer.Schema.User do
   use ChatServer.Schema
 
+  alias __MODULE__
+  alias ChatServer.Repo
+
   schema "users" do
     field :name, :string
 
     timestamps()
   end
-end
 
+  def get(id) do
+    Repo.get(User, id)
+  end
+
+  def get_by(key, value) do
+    params = Keyword.put([], key, value)
+
+    User |> Repo.get_by(params)
+  end
+
+  def get_or_create_by(key, value, params) do
+    case get_by(key, value) do
+      nil -> {:ok, create(params)}
+      user -> {:ok, user}
+    end
+  end
+
+  def create(params) do
+    %User{}
+    |> changeset(params)
+    |> Repo.insert
+  end
+
+  def update(%User{} = user, params) do
+    user
+    |> changeset(params)
+    |> Repo.update
+  end
+
+  def changeset(struct, params) do
+    struct
+    |> cast(params, [:name])
+    |> validate_required(:name)
+  end
+end

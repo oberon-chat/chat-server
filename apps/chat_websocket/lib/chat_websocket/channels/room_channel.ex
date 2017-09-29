@@ -23,7 +23,7 @@ defmodule ChatWebsocket.RoomChannel do
     push socket, "presence_state", Presence.list(socket)
     push socket, "message_state", Room.get_messages(socket)
 
-    Presence.track(socket, socket.assigns.user, %{
+    Presence.track(socket, socket.assigns.user.name, %{
       node_name: node_name(),
       online_at: :os.system_time(:milli_seconds)
     })
@@ -42,12 +42,14 @@ defmodule ChatWebsocket.RoomChannel do
       %{
         room: room,
         room_pid: room_pid,
-        user: user
+        user: %{
+          name: name
+        }
       } = socket.assigns
 
       message = %{
         id: message.id,
-        user: user,
+        user: name,
         body: message.body,
         edited: message.edited,
         room: room,
@@ -66,7 +68,7 @@ defmodule ChatWebsocket.RoomChannel do
   end
 
   def handle_in("message:update", message, socket) do
-    with true <- Map.get(message, "user") == socket.assigns.user do
+    with true <- Map.get(message, "user") == socket.assigns.user.name do
       %{message: updated} = Room.update_message(socket, message)
 
       broadcast! socket, "message:update", updated
@@ -76,7 +78,7 @@ defmodule ChatWebsocket.RoomChannel do
   end
 
   def handle_in("message:delete", message, socket) do
-    with true <- Map.get(message, "user") == socket.assigns.user,
+    with true <- Map.get(message, "user") == socket.assigns.user.name,
          {:ok, _} <- Room.delete_message(socket, message) do
       broadcast! socket, "message:delete", message
     end
