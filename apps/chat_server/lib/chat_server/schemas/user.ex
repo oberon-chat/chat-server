@@ -1,9 +1,6 @@
 defmodule ChatServer.Schema.User do
   use ChatServer.Schema
 
-  alias __MODULE__
-  alias ChatServer.Repo
-
   schema "users" do
     field :name, :string
 
@@ -16,13 +13,12 @@ defmodule ChatServer.Schema.User do
 
   def get_by(key, value) do
     params = Keyword.put([], key, value)
-
-    User |> Repo.get_by(params)
+    Repo.get_by(User, params)
   end
 
   def get_or_create_by(key, value, params) do
     case get_by(key, value) do
-      nil -> {:ok, create(params)}
+      nil -> create(params)
       user -> {:ok, user}
     end
   end

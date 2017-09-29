@@ -16,11 +16,12 @@ defmodule ChatServer.Schema.RoomTest do
       assert changeset.valid? == true
     end
 
-    test "it receives a default status from the schema definition" do
+    test "it receives a default status and type from the schema definition" do
       params = %{name: "hello"}
       changeset = Room.changeset(%Room{}, params)
 
       assert changeset.data.status == "active"
+      assert changeset.data.type == "persistent"
     end
   end
 
@@ -38,6 +39,13 @@ defmodule ChatServer.Schema.RoomTest do
 
       assert changeset.changes.status == "active"
     end
+
+    test "type gets downcased" do
+      params = %{type: "PERSIstent"}
+      changeset = Room.changeset(%Room{}, params)
+
+      assert changeset.changes.type == "persistent"
+    end
   end
 
   describe "changset - validations" do
@@ -47,6 +55,14 @@ defmodule ChatServer.Schema.RoomTest do
 
       assert changeset.valid? == false
       assert changeset.errors == [name: {"can't be blank", [validation: :required]}]
+    end
+
+    test "type must be in enum options" do
+      params = %{name: "hello", type: "invalid-test"}
+      changeset = Room.changeset(%Room{}, params)
+
+      assert changeset.valid? == false
+      assert changeset.errors == [type: {"is invalid", [validation: :inclusion]}]
     end
 
     test "status must be in enum options" do

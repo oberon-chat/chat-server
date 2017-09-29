@@ -1,9 +1,6 @@
 defmodule ChatServer.Schema.Message do
   use ChatServer.Schema
 
-  alias __MODULE__
-  alias ChatServer.Repo
-
   schema "messages" do
     field :body, :string
     field :edited, :boolean, default: false

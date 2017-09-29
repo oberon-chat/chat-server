@@ -7,6 +7,7 @@ defmodule ChatServer.Schema do
       import Ecto.Changeset
       import Ecto.Query
 
+      alias __MODULE__
       alias ChatServer.Repo
 
       @primary_key {:id, :binary_id, autogenerate: true}

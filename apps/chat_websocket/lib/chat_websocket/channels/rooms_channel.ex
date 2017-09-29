@@ -2,6 +2,7 @@ defmodule ChatWebsocket.RoomsChannel do
   use Phoenix.Channel
 
   alias ChatPubSub.Presence
+  alias ChatServer.Schema
   alias ChatServer.Room
 
   def join("rooms", _, socket) do
@@ -28,12 +29,13 @@ defmodule ChatWebsocket.RoomsChannel do
     {:noreply, socket}
   end
 
-  defp find_or_start_room(room) do
-    case Presence.list("room_pids")[room] do
+  defp find_or_start_room(name) do
+    case Presence.list("room_pids")[name] do
       nil ->
-        with {:ok, pid} <- Room.start(room),
-             :ok <- broadcast_creation(room),
-             :ok <- track_room(room, pid) do
+        with {:ok, room} <- Schema.Room.get_or_create_by(:name, name, %{name: name}),
+             {:ok, pid} <- Room.start(room.name),
+             :ok <- broadcast_creation(room.name),
+             :ok <- track_room(room.name, pid) do
           pid
         end
       %{metas: [%{pid: pid}]} ->
