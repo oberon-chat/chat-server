@@ -20,7 +20,7 @@ defmodule ChatServer.Mixfile do
 
   def application do
     [
-      mod: {ChatServer.Application, []},
+      mod: {ChatServer, []},
       applications: [
         :logger,
         :postgrex,

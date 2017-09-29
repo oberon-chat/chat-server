@@ -11,8 +11,8 @@ defmodule ChatServer.Room do
     Supervisor.start_child(RoomSupervisor, [name])
   end
 
-  def start_link(name) do
-    GenServer.start_link(__MODULE__, name)
+  def start_link(name, opts \\ []) do
+    GenServer.start_link(__MODULE__, name, opts)
   end
 
   def stop(room_pid) do

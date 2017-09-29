@@ -9,10 +9,10 @@ defmodule ChatWebhook.WebhookInitializer do
     defstruct started: []
   end
 
-  def start_link do
+  def start_link(opts \\ []) do
     callbacks = Repo.all(Callback)
 
-    GenServer.start_link(__MODULE__, callbacks)
+    GenServer.start_link(__MODULE__, callbacks, opts)
   end
 
   def init(callbacks) do
