@@ -14,10 +14,33 @@ defmodule ChatServer.Schema.Message do
     timestamps()
   end
 
+  def get(id) do
+    Repo.get(Message, id)
+  end
+
   def create(params) do
     %Message{}
     |> changeset(params)
     |> Repo.insert
+  end
+
+  def update(%Message{} = message, body) do
+    message
+    |> changeset(%{body: body, edited: true})
+    |> Repo.update
+  end
+
+  def public(%Message{} = message) do
+    message = Repo.preload(message, [:room, :user])
+
+    %{
+      id: message.id,
+      user: message.user.name,
+      body: message.body,
+      edited: message.edited,
+      room: message.room.name,
+      timestamp: message.inserted_at
+    }
   end
 
   def changeset(struct, params) do
