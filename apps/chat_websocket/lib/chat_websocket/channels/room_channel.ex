@@ -86,13 +86,13 @@ defmodule ChatWebsocket.RoomChannel do
     {:noreply, socket}
   end
 
-  def terminate(_message, socket) do
-    userCount = Presence.list(socket) |> Map.keys |> length
+  # def terminate(_message, socket) do
+  #   userCount = Presence.list(socket) |> Map.keys |> length
 
-    if userCount <= 1 do
-      Room.stop(socket.assigns.room_pid)
-    end
-  end
+  #   if userCount <= 1 do
+  #     Room.stop(socket.assigns.room_pid)
+  #   end
+  # end
 
   defp find_room(room, attempt \\ 1) do
     if attempt <= 4 do

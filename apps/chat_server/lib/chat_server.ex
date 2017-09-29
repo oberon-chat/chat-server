@@ -8,6 +8,9 @@ defmodule ChatServer do
       supervisor(ChatServer.Repo, []),
       supervisor(ChatServer.RoomSupervisor, [
         [name: ChatServer.RoomSupervisor]
+      ]),
+      supervisor(ChatServer.RoomInitializer, [
+        [name: ChatServer.RoomInitializer]
       ])
     ]
 

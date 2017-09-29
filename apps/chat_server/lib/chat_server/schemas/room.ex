@@ -15,6 +15,8 @@ defmodule ChatServer.Schema.Room do
     timestamps()
   end
 
+  def all, do: Repo.all(__MODULE__)
+
   def get_by(key, value) do
     params = Keyword.put([], key, value)
     Repo.get_by(Room, params)
