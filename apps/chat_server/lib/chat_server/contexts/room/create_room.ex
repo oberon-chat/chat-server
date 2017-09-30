@@ -1,8 +1,13 @@
 defmodule ChatServer.CreateRoom do
   require Logger
 
-  alias ChatServer.Event
   alias ChatServer.Schema
+
+  defmodule State do
+    @derive {Poison.Encoder, only: [room: [:id, :slug, :name]]}
+
+    defstruct [:room]
+  end
 
   def call(params \\ %{}) do
     Logger.info "Creating room " <> inspect(params)
@@ -22,7 +27,7 @@ defmodule ChatServer.CreateRoom do
   end
 
   defp broadcast_creation(room) do
-    event = %Event.RoomCreated{room: room}
+    event = %State{room: room}
 
     ChatPubSub.broadcast! "events", "room:created", event
   end
