@@ -21,9 +21,9 @@ defmodule ChatServer.Schema.Message do
     |> Repo.insert
   end
 
-  def update(%Message{} = message, body) do
+  def update(%Message{} = message, params) do
     message
-    |> changeset(%{body: body, edited: true})
+    |> changeset(params)
     |> Repo.update
   end
 
@@ -44,6 +44,7 @@ defmodule ChatServer.Schema.Message do
     struct
     |> cast(params, [:body, :edited, :room_id, :user_id])
     |> validate_required(:body)
-    # |> assoc_constraint(:room)
+    |> assoc_constraint(:room)
+    |> assoc_constraint(:user)
   end
 end

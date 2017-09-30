@@ -2,6 +2,7 @@ defmodule ChatServer.Room do
   use GenServer
 
   alias ChatServer.RoomSupervisor
+  alias ChatServer.TrackRooms
 
   defmodule State do
     defstruct [:room, messages: []]
@@ -24,45 +25,45 @@ defmodule ChatServer.Room do
   end
 
   def get_name(%Phoenix.Socket{} = socket) do
-    GenServer.call(socket.assigns[:room_pid], {:get_name})
+    GenServer.call(get_pid(socket), {:get_name})
   end
   def get_name(pid) do
     GenServer.call(pid, {:get_name})
   end
 
   def get_message(%Phoenix.Socket{} = socket, id) do
-    GenServer.call(socket.assigns[:room_pid], {:get_message, id})
+    GenServer.call(get_pid(socket), {:get_message, id})
   end
   def get_message(pid, id) do
     GenServer.call(pid, {:get_message, id})
   end
 
   def get_messages(%Phoenix.Socket{} = socket) do
-    GenServer.call(socket.assigns[:room_pid], :get_messages)
+    GenServer.call(get_pid(socket), :get_messages)
   end
   def get_messages(pid) do
     GenServer.call(pid, :get_messages)
   end
 
   def update_message(%Phoenix.Socket{} = socket, message) do
-    GenServer.call(socket.assigns[:room_pid], {:update_message, message})
+    GenServer.call(get_pid(socket), {:update_message, message})
   end
   def update_message(pid, message) do
     GenServer.call(pid, {:update_message, message})
   end
 
   def delete_message(%Phoenix.Socket{} = socket, message) do
-    GenServer.call(socket.assigns[:room_pid], {:delete_message, message})
+    GenServer.call(get_pid(socket), {:delete_message, message})
   end
   def delete_message(pid, message) do
     GenServer.call(pid, {:delete_message, message})
   end
 
   def create_message(%Phoenix.Socket{} = socket, msg) do
-    GenServer.cast(socket.assigns[:room_pid], {:create_message, msg})
+    GenServer.call(get_pid(socket), {:create_message, msg})
   end
   def create_message(pid, msg) do
-    GenServer.cast(pid, {:create_message, msg})
+    GenServer.call(pid, {:create_message, msg})
   end
 
   def init(room) do
@@ -81,30 +82,23 @@ defmodule ChatServer.Room do
     {:reply, %{messages: messages}, state}
   end
 
+  def handle_call({:create_message, message}, _from, %{messages: messages} = state) do
+    {:reply, {:ok, message}, %{state | messages: [message | messages]}}
+  end
+
   def handle_call({:update_message, message}, _from, %{messages: messages} = state) do
-    id = Map.get(message, "id")
-    body = Map.get(message, "body")
-    current = find_message(messages, id)
-    updated = %{ current | body: body, edited: true }
-    updated_messages = replace_message(messages, updated, id)
+    id = Map.get(message, :id)
+    updated_messages = replace_message(messages, message, id)
 
-    ChatPubSub.broadcast! "rooms", "message:updated", updated
-
-    {:reply, %{message: updated}, %{state | messages: updated_messages}}
+    {:reply, {:ok, message}, %{state | messages: updated_messages}}
   end
 
   def handle_call({:delete_message, message}, _from, %{messages: messages} = state) do
-    id = Map.get(message, "id")
+    id = Map.get(message, :id)
 
-    ChatPubSub.broadcast! "rooms", "message:deleted", message
+    ChatPubSub.broadcast! "events", "message:deleted", message
 
     {:reply, {:ok, id}, %{state | messages: remove_message(messages, id)}}
-  end
-
-  def handle_cast({:create_message, message}, %{messages: messages} = state) do
-    ChatPubSub.broadcast! "rooms", "message:created", message
-
-    {:noreply, %{state | messages: [message | messages]}}
   end
 
   def handle_info(_message, state) do
@@ -129,5 +123,9 @@ defmodule ChatServer.Room do
     with message <- find_message(messages, id) do
       messages |> List.delete(message)
     end
+  end
+
+  defp get_pid(socket) do
+    TrackRooms.get_pid(socket.assigns[:room])
   end
 end

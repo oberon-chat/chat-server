@@ -24,6 +24,6 @@ defmodule ChatServer.CreateRoom do
   defp broadcast_creation(room) do
     event = %Event.RoomCreated{room: room}
 
-    ChatPubSub.broadcast! "rooms", "room:created", event
+    ChatPubSub.broadcast! "events", "room:created", event
   end
 end

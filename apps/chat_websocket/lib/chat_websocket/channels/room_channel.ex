@@ -3,22 +3,24 @@ defmodule ChatWebsocket.RoomChannel do
 
   alias ChatServer.Room
   alias ChatServer.Schema
+  alias ChatServer.CreateMessage
   alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
+  alias ChatServer.UpdateMessage
 
   def join("room:" <> name, _, socket) do
     case Schema.Room.get_by(:name, name) do
       nil -> {:error, "Room #{name} does not exist"}
-      room ->
-        socket = socket
-          |> assign(:room, room)
-          |> assign(:room_pid, TrackRooms.get_pid(room))
-
-        send self(), :after_join
-
-        {:ok, assign(socket, :room, room)}
+      room -> join_room(socket, room)
     end
   end
+
+  defp join_room(socket, room) do
+    send self(), :after_join
+    {:ok, assign(socket, :room, room)}
+  end
+
+  # Callbacks
 
   def handle_info(:after_join, socket) do
     TrackRoomUsers.track(socket, socket.assigns.user)
@@ -35,38 +37,24 @@ defmodule ChatWebsocket.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("message:create", message, socket) do
-    with {:ok, message} <- Schema.Message.create(%{ body: message }) do
-      %{
-        room: room,
-        user: %{
-          name: name
-        }
-      } = socket.assigns
+  def handle_in("message:create", params, socket) do
+    %{room: room, user: user} = socket.assigns
 
-      message = %{
-        id: message.id,
-        user: name,
-        body: message.body,
-        edited: message.edited,
-        room: room.name,
-        timestamp: message.inserted_at
-      }
-
-      TrackRooms.update(room, %{last_message: message})
-
-      Room.create_message(socket, message)
-      broadcast! socket, "message:created", message
+    with {:ok, public_message} <- CreateMessage.call(params, room, user),
+         {:ok, _} <- Room.create_message(socket, public_message) do
+      TrackRooms.update(room, %{last_message: public_message})
+      broadcast! socket, "message:created", public_message
     end
 
     {:noreply, socket}
   end
 
-  def handle_in("message:update", message, socket) do
-    with true <- Map.get(message, "user") == socket.assigns.user.name do
-      %{message: updated} = Room.update_message(socket, message)
+  def handle_in("message:update", params, socket) do
+    %{user: user} = socket.assigns
 
-      broadcast! socket, "message:update", updated
+    with {:ok, record} <- UpdateMessage.call(params, user),
+         {:ok, message} <- Room.update_message(socket, record) do
+      broadcast! socket, "message:updated", message
     end
 
     {:noreply, socket}
@@ -75,7 +63,7 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("message:delete", message, socket) do
     with true <- Map.get(message, "user") == socket.assigns.user.name,
          {:ok, _} <- Room.delete_message(socket, message) do
-      broadcast! socket, "message:delete", message
+      broadcast! socket, "message:deleted", message
     end
 
     {:noreply, socket}

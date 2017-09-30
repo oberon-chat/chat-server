@@ -20,6 +20,6 @@ defmodule ChatServer.StartRoom do
   defp broadcast_start(room, pid) do
     event = %Event.RoomStarted{pid: pid, room: room}
 
-    ChatPubSub.broadcast! "rooms", "room:started", event
+    ChatPubSub.broadcast! "events", "room:started", event
   end
 end
