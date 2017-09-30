@@ -9,8 +9,8 @@ defmodule ChatServer.StartRoom do
     Logger.info "Starting room #{room.name} (#{room.id})"
 
     with {:ok, pid} <- Room.start(room),
-         :ok <- broadcast_start(room, pid),
-         :ok <- track_room(room, pid) do
+         {:ok, _} <- TrackRooms.track(pid, room),
+         :ok <- broadcast_start(room, pid) do
       {:ok, pid}
     else
       _ -> nil
@@ -21,14 +21,5 @@ defmodule ChatServer.StartRoom do
     event = %Event.RoomStarted{pid: pid, room: room}
 
     ChatPubSub.broadcast! "rooms", "room:started", event
-  end
-
-  defp track_room(room, pid) do
-    with {:ok, _} <- TrackRooms.track(pid, room),
-         {:ok, _} <- TrackRooms.track_pid(pid, room) do
-      :ok
-    else
-      _ -> :error
-    end
   end
 end
