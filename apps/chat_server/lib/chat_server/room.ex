@@ -94,11 +94,9 @@ defmodule ChatServer.Room do
   end
 
   def handle_call({:delete_message, message}, _from, %{messages: messages} = state) do
-    id = Map.get(message, :id)
+    id = Map.get(message, "id")
 
-    ChatPubSub.broadcast! "events", "message:deleted", message
-
-    {:reply, {:ok, id}, %{state | messages: remove_message(messages, id)}}
+    {:reply, {:ok, message}, %{state | messages: remove_message(messages, id)}}
   end
 
   def handle_info(_message, state) do

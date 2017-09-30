@@ -4,6 +4,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.Room
   alias ChatServer.Schema
   alias ChatServer.CreateMessage
+  alias ChatServer.DeleteMessage
   alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
   alias ChatServer.UpdateMessage
@@ -60,9 +61,11 @@ defmodule ChatWebsocket.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("message:delete", message, socket) do
-    with true <- Map.get(message, "user") == socket.assigns.user.name,
-         {:ok, _} <- Room.delete_message(socket, message) do
+  def handle_in("message:delete", params, socket) do
+    %{user: user} = socket.assigns
+
+    with {:ok, _} <- DeleteMessage.call(params, user),
+         {:ok, message} <- Room.delete_message(socket, params) do
       broadcast! socket, "message:deleted", message
     end
 

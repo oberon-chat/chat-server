@@ -27,6 +27,10 @@ defmodule ChatServer.Schema.Message do
     |> Repo.update
   end
 
+  def delete(%Message{} = message) do
+    Repo.delete(message)
+  end
+
   def public(%Message{} = message) do
     message = Repo.preload(message, [:room, :user])
 
