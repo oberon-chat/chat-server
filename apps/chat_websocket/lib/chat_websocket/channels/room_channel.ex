@@ -41,10 +41,10 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("message:create", params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, public_message} <- CreateMessage.call(params, room, user),
-         {:ok, _} <- Room.create_message(socket, public_message) do
-      TrackRooms.update(room, %{last_message: public_message})
-      broadcast! socket, "message:created", public_message
+    with {:ok, record} <- CreateMessage.call(params, room, user),
+         {:ok, _} <- Room.create_message(socket, record) do
+      TrackRooms.update(room, %{last_message: record})
+      broadcast! socket, "message:created", record
     end
 
     {:noreply, socket}

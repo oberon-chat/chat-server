@@ -1,6 +1,11 @@
 defmodule ChatServer.Schema.Room do
   use ChatServer.Schema
 
+  @derive {
+    Poison.Encoder,
+    except: [:__meta__, :inserted_at, :updated_at]
+  }
+
   @default_type "persistent"
   @default_status "active"
 

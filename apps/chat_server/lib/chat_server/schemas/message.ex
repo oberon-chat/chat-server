@@ -1,6 +1,8 @@
 defmodule ChatServer.Schema.Message do
   use ChatServer.Schema
 
+  @derive {Poison.Encoder, except: [:__meta__]}
+
   schema "messages" do
     field :body, :string
     field :edited, :boolean, default: false
@@ -29,19 +31,6 @@ defmodule ChatServer.Schema.Message do
 
   def delete(%Message{} = message) do
     Repo.delete(message)
-  end
-
-  def public(%Message{} = message) do
-    message = Repo.preload(message, [:room, :user])
-
-    %{
-      id: message.id,
-      user: message.user.name,
-      body: message.body,
-      edited: message.edited,
-      room: message.room.name,
-      timestamp: message.inserted_at
-    }
   end
 
   def changeset(struct, params) do

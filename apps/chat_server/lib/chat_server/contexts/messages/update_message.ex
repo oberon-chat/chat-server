@@ -10,7 +10,7 @@ defmodule ChatServer.UpdateMessage do
          true <- owner?(record, user),
          {:ok, record} <- update_record(record, params),
          :ok <- broadcast_update(record) do
-      {:ok, Schema.Message.public(record)}
+      {:ok, Schema.Message.preload(record, [:room, :user])}
     else
       _ -> {:error, "Error updating message"}
     end

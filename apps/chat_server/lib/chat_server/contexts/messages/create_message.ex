@@ -8,7 +8,7 @@ defmodule ChatServer.CreateMessage do
 
     with {:ok, record} <- create_record(params, room, user),
          :ok <- broadcast_create(record) do
-      {:ok, Schema.Message.public(record)}
+      {:ok, Schema.Message.preload(record, [:room, :user])}
     else
       _ -> {:error, "Error creating message"}
     end

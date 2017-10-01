@@ -1,6 +1,11 @@
 defmodule ChatServer.Schema.User do
   use ChatServer.Schema
 
+  @derive {
+    Poison.Encoder,
+    except: [:__meta__, :inserted_at, :updated_at]
+  }
+
   schema "users" do
     field :name, :string
 
