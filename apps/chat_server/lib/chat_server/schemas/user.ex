@@ -6,8 +6,11 @@ defmodule ChatServer.Schema.User do
     except: [:__meta__, :inserted_at, :updated_at]
   }
 
+  @default_type "user"
+
   schema "users" do
     field :name, :string
+    field :type, :string, default: @default_type
 
     timestamps()
   end
@@ -42,7 +45,12 @@ defmodule ChatServer.Schema.User do
 
   def changeset(struct, params) do
     struct
-    |> cast(params, [:name])
+    |> cast(params, [:name, :type])
     |> validate_required(:name)
+    |> update_change(:type, &downcase/1)
+    |> validate_inclusion(:type, ["guest", "user"])
   end
+
+  defp downcase(value) when is_bitstring(value), do: String.downcase(value)
+  defp downcase(_), do: nil
 end
