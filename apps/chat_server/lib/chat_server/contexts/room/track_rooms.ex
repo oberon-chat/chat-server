@@ -1,19 +1,13 @@
 defmodule ChatServer.TrackRooms do
   alias ChatPubSub.Presence
 
-  defmodule State do
-    @derive {Poison.Encoder, only: [:last_message, room: [:id, :slug, :name]]}
-
-    defstruct [:last_message, :name, :pid]
-  end
-
   @presence_key "rooms"
 
   def track(pid, room) do
-    Presence.track(pid, @presence_key, key(room), %State{
+    Presence.track(pid, @presence_key, key(room), %{
       name: room.name,
       last_message: nil,
-      pid: pid
+      pid: Util.Pid.serialize(pid)
     })
   end
 
@@ -36,8 +30,8 @@ defmodule ChatServer.TrackRooms do
         nil ->
           :timer.sleep(50)
           get_room_pid(key, attempt + 1)
-        %{metas: [%State{pid: pid}]} ->
-          pid
+        %{metas: [%{pid: pid}]} ->
+          Util.Pid.deserialize(pid)
       end
     else
       nil
