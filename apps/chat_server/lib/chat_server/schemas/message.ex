@@ -10,7 +10,7 @@ defmodule ChatServer.Schema.Message do
     belongs_to :room, Schema.Room
     belongs_to :user, Schema.User
 
-    many_to_many :starred_messages, ChatServer.Schema.User, join_through: StarredMessage
+    many_to_many :users, ChatServer.Schema.User, join_through: "starred_messages"
 
     timestamps()
   end
