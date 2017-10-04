@@ -1,5 +1,10 @@
 export CHAT_SERVER_PORT=4040
 
+export CHAT_OAUTH2_POSTGRES_HOST=localhost
+export CHAT_OAUTH2_POSTGRES_USER=postgres
+export CHAT_OAUTH2_POSTGRES_PASS=postgres
+export CHAT_OAUTH2_POSTGRES_DB=chat_oauth2
+
 export CHAT_SERVER_POSTGRES_HOST=localhost
 export CHAT_SERVER_POSTGRES_USER=postgres
 export CHAT_SERVER_POSTGRES_PASS=postgres
