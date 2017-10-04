@@ -9,6 +9,10 @@ defmodule ChatOAuth2.GraphQL.Resolver.User do
   alias ChatOAuth2.User.Instance, as: UserInstance
   alias ChatOAuth2.UserProvider.Instance, as: UserProviderInstance
 
+  def introspect(_params, info) do
+    Repo.get(User, CurrentUser.id(info))
+  end
+
   def update(%{id: id, user: user_params}, info) do
     case id == CurrentUser.id(info) do
       false -> {:error, "Not authorized to update user account #{id}"}

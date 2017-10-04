@@ -6,6 +6,9 @@ defmodule ChatOAuth2.GraphQL.Types.User do
   alias ChatOAuth2.GraphQL.Resolver
 
   object :user_queries do
+    field :introspect, type: :user do
+      resolve with_login(&Resolver.User.instrospect/2)
+    end
   end
 
   input_object :update_user_params do
@@ -23,7 +26,7 @@ defmodule ChatOAuth2.GraphQL.Types.User do
     end
 
     field :update_user, type: :user do
-      arg :id, non_null(:integer)
+      arg :id, non_null(:string)
       arg :user, :update_user_params
 
       resolve with_login(&Resolver.User.update/2)

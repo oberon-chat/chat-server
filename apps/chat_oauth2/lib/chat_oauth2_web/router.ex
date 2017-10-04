@@ -7,13 +7,13 @@ defmodule ChatOAuth2Web.Router do
     plug ChatOAuth2.Plug.Context
   end
 
+  if Application.get_env(:chat_oauth2, :graphiql, false) do
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: ChatOAuth2.GraphQL.Schema
+	end
+
   scope "/" do
     pipe_through :graphql
 
     forward "/", Absinthe.Plug, schema: ChatOAuth2.GraphQL.Schema
   end
-
-  if Application.get_env(:chat_oauth2, :graphiql, false) do
-    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: ChatOAuth2.GraphQL.Schema
-	end
 end
