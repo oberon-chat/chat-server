@@ -8,13 +8,26 @@ export CHAT_OAUTH2_POSTGRES_DB=chat_oauth2
 
 # WARNING
 #
-# A new secret must be generated and used to replace the value below.
+# A new secrets must be generated and used to replace the values below.
 # To generate one from the command line:
 #
 #   cd apps/chat_websocket
 #   mix phx.gen.secret
 #
 export CHAT_OAUTH2_SECRET_KEY_BASE="qK7YOaxfR7HEVkzrfFuBgJoUQ+vOUcSRssK1XntawMJCX5tOBEYeUrkR+HTqjzJE"
+export CHAT_OAUTH2_GUARDIAN_SECRET_KEY="ZK+Y90gf/9P0eQQb5lJ2vCn2BEmSOOdfK9mIAu7gK++mVkLkgrM+gXJjL2O0h++/"
+
+# Notice
+#
+# Using OAuth2 logins require registering an application with the provider.
+# For the field below, configure a new OAuth2 application and replace the
+# values below:
+#
+export CHAT_OAUTH2_FACEBOOK_APP_ID=""
+export CHAT_OAUTH2_FACEBOOK_APP_SECRET=""
+
+export CHAT_OAUTH2_GITHUB_APP_ID=""
+export CHAT_OAUTH2_GITHUB_APP_SECRET=""
 
 ### Chat Server
 

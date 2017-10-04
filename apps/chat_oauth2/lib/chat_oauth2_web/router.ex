@@ -1,11 +1,19 @@
 defmodule ChatOAuth2Web.Router do
   use ChatOAuth2Web, :router
 
-  pipeline :api do
-    plug :accepts, ["json"]
+  pipeline :graphql do
+    plug Guardian.Plug.VerifyHeader, realm: "Bearer"
+    plug Guardian.Plug.LoadResource
+    plug ChatOAuth2.Plug.Context
   end
 
-  scope "/api", ChatOAuth2Web do
-    pipe_through :api
+  scope "/" do
+    pipe_through :graphql
+
+    forward "/", Absinthe.Plug, schema: ChatOAuth2.GraphQL.Schema
   end
+
+  if Application.get_env(:chat_oauth2, :graphiql, false) do
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: ChatOAuth2.GraphQL.Schema
+	end
 end

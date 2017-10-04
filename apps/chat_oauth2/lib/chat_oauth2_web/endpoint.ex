@@ -36,6 +36,8 @@ defmodule ChatOAuth2Web.Endpoint do
     key: "_chat_oauth2_key",
     signing_salt: "sPvVspcj"
 
+  plug CORSPlug, origin: ["*"]
+
   plug ChatOAuth2Web.Router
 
   @doc """

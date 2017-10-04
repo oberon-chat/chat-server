@@ -45,3 +45,6 @@ config :chat_oauth2, ChatOAuth2.Repo,
   password: System.get_env("CHAT_OAUTH2_POSTGRES_PASS"),
   database: System.get_env("CHAT_OAUTH2_POSTGRES_DB"),
   pool_size: 10
+
+# Turn on GraphiQL
+config :chat_oauth2, :graphiql, true
