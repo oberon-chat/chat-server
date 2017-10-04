@@ -1,16 +1,45 @@
-export CHAT_SERVER_PORT=4040
+### Chat OAuth2
 
+export CHAT_OAUTH2_PORT=4041
 export CHAT_OAUTH2_POSTGRES_HOST=localhost
 export CHAT_OAUTH2_POSTGRES_USER=postgres
 export CHAT_OAUTH2_POSTGRES_PASS=postgres
 export CHAT_OAUTH2_POSTGRES_DB=chat_oauth2
+
+# WARNING
+#
+# A new secret must be generated and used to replace the value below.
+# To generate one from the command line:
+#
+#   cd apps/chat_websocket
+#   mix phx.gen.secret
+#
+export CHAT_OAUTH2_SECRET_KEY_BASE="qK7YOaxfR7HEVkzrfFuBgJoUQ+vOUcSRssK1XntawMJCX5tOBEYeUrkR+HTqjzJE"
+
+### Chat Server
 
 export CHAT_SERVER_POSTGRES_HOST=localhost
 export CHAT_SERVER_POSTGRES_USER=postgres
 export CHAT_SERVER_POSTGRES_PASS=postgres
 export CHAT_SERVER_POSTGRES_DB=chat_server
 
+### Chat Webhook
+
 export CHAT_WEBHOOK_POSTGRES_HOST=localhost
 export CHAT_WEBHOOK_POSTGRES_USER=postgres
 export CHAT_WEBHOOK_POSTGRES_PASS=postgres
 export CHAT_WEBHOOK_POSTGRES_DB=chat_webhook
+
+### Chat Websocket
+
+export CHAT_WEBSOCKET_PORT=4040
+
+# WARNING
+#
+# A new secret must be generated and used to replace the value below.
+# To generate one from the command line:
+#
+#   cd apps/chat_websocket
+#   mix phx.gen.secret
+#
+export CHAT_WEBSOCKET_SECRET_KEY_BASE="POU/b28Rdap2Hp2Bo0HfK4UIOPwvtm5AdO4PyozuF7K+2PeyBkYj6VDrvYh6SpAQ"

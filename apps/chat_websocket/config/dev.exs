@@ -8,7 +8,7 @@ use Mix.Config
 # with brunch.io to recompile .js and .css sources.
 config :chat_websocket, ChatWebsocket.Endpoint,
   url: [scheme: "https", host: "chat-server.dev", port: 443],
-  http: [port: System.get_env("CHAT_SERVER_PORT") || 4000],
+  http: [port: System.get_env("CHAT_WEBSOCKET_PORT") || 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

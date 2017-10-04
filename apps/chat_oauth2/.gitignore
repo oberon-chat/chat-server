@@ -1,17 +1,16 @@
-# The directory Mix will write compiled artifacts to.
+# App artifacts
 /_build
-
-# If you run "mix test --cover", coverage assets end up here.
-/cover
-
-# The directory Mix downloads your dependencies sources to.
+/db
 /deps
+/*.ez
 
-# Where 3rd-party dependencies like ExDoc output generated docs.
-/doc
-
-# If the VM crashes, it generates a dump, let's ignore it too.
+# Generated on crash by the VM
 erl_crash.dump
 
-# Also ignore archive artifacts (built via "mix archive.build").
-*.ez
+# Files matching config/*.secret.exs pattern contain sensitive
+# data and you should not commit them into version control.
+#
+# Alternatively, you may comment the line below and commit the
+# secrets files as long as you replace their contents by environment
+# variables.
+/config/*.secret.exs

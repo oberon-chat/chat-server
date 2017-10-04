@@ -1,5 +1,16 @@
 # Oberon Server
 
+## Deployment
+
+Create an environmental variable file. An example one is provided:
+
+```
+cp .envrc.example .envrc
+```
+
+Read through `.envrc` and follow any instructions on regenerating secure
+values.
+
 ## Development
 
 ### Development Environment
