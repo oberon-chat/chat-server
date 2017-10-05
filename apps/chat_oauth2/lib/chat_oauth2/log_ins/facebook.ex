@@ -15,7 +15,8 @@ defmodule ChatOAuth2.LogIn.Facebook do
         _ -> fetch_user_data(client)
       end
     rescue
-      error in ArgumentError -> Logger.error inspect(error)
+      error ->
+        Logger.error inspect(error)
         {:error, "Error fetching facebook token"}
     end
   end
