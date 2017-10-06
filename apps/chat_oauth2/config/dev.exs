@@ -7,7 +7,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :chat_oauth2, ChatOAuth2Web.Endpoint,
-  url: [scheme: "https", host: "login.chat-server.dev", port: 443],
+  url: [scheme: "https", host: "oauth2.example.dev", port: 443],
   http: [port: System.get_env("CHAT_OAUTH2_PORT") || 4010],
   debug_errors: true,
   code_reloader: true,

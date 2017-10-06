@@ -1,4 +1,4 @@
-defmodule ChatOAuth2.LogIn.GitHub do
+defmodule ChatOAuth2.Provider.GitHub do
   require Logger
 
   def fetch(code, redirect_uri),

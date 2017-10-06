@@ -1,4 +1,4 @@
-defmodule ChatOAuth2.LogIn.Facebook do
+defmodule ChatOAuth2.Provider.Facebook do
   require Logger
 
   def fetch(code, redirect_uri),

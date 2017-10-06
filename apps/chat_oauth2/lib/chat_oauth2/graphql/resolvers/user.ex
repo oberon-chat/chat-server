@@ -2,18 +2,18 @@ defmodule ChatOAuth2.GraphQL.Resolver.User do
   require Logger
 
   alias ChatOAuth2.Repo
-  alias ChatOAuth2.CurrentUser
-  alias ChatOAuth2.LogIn.Facebook
-  alias ChatOAuth2.LogIn.GitHub
+  alias ChatOAuth2.Request
+  alias ChatOAuth2.Provider.Facebook
+  alias ChatOAuth2.Provider.GitHub
   alias ChatOAuth2.User
   alias ChatOAuth2.UserProvider
 
   def introspect(_params, info) do
-    Repo.get(User, CurrentUser.id(info))
+    Repo.get(User, Request.User.id(info))
   end
 
   def update(%{id: id, user: user_params}, info) do
-    case id == CurrentUser.id(info) do
+    case id == Request.User.id(info) do
       false -> {:error, "Not authorized to update user account #{id}"}
       true -> Repo.get!(User, id)
               |> User.update_changeset(user_params)

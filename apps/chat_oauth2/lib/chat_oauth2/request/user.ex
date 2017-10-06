@@ -1,4 +1,4 @@
-defmodule ChatOAuth2.CurrentUser do
+defmodule ChatOAuth2.Request.User do
   def present?(%{context: %{current_user: %{id: _id}}}), do: true
   def present?(_), do: false
 
