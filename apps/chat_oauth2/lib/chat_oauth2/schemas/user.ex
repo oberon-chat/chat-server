@@ -2,7 +2,7 @@ defmodule ChatOAuth2.User do
   use ChatOAuth2.Schema
 
   alias Ecto.Changeset
-  alias Comeonin.Bcrypt
+  alias ChatOAuth2.UserProvider
 
   schema "users" do
     field :name, :string
@@ -10,15 +10,12 @@ defmodule ChatOAuth2.User do
     field :last_name, :string
     field :locale, :string
     field :email, :string
-    field :password, :string, virtual: true
-    field :password_hash, :string
-    has_many :user_providers, ChatOAuth2.UserProvider
+    has_many :user_providers, UserProvider
     timestamps()
   end
 
-  @doc """
-  Builds a changeset based on the `struct` and `params`.
-  """
+  # Changesets
+
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:name, :email, :first_name, :last_name, :locale])
@@ -27,25 +24,28 @@ defmodule ChatOAuth2.User do
 
   def update_changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :email, :password])
+    |> cast(params, [:name, :email])
     |> validate_required([:name, :email])
-    |> validate_length(:password, min: 12)
-    |> put_password_hash()
   end
 
   def register_changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :email, :password])
-    |> validate_required([:name, :email, :password])
-    |> put_password_hash()
+    |> cast(params, [:name, :email])
+    |> validate_required([:name, :email])
   end
 
-  defp put_password_hash(changeset) do
-    case changeset do
-      %Changeset{valid?: true, changes: %{password: password}} ->
-        put_change(changeset, :password_hash, Bcrypt.hashpwsalt(password))
-      _ ->
-        changeset
+  # Mutations
+
+  def find_or_create_by_provider(user_params, provider_params) do
+    case UserProvider.find_user(provider_params) do
+      nil -> create_by(user_params)
+      user -> {:ok, user}
     end
+  end
+
+  defp create_by(params) do
+    %User{}
+    |> User.changeset(params)
+    |> Repo.insert
   end
 end

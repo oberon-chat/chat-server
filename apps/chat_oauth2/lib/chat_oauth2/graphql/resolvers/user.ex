@@ -3,11 +3,10 @@ defmodule ChatOAuth2.GraphQL.Resolver.User do
 
   alias ChatOAuth2.Repo
   alias ChatOAuth2.CurrentUser
-  alias ChatOAuth2.User
   alias ChatOAuth2.LogIn.Facebook
   alias ChatOAuth2.LogIn.GitHub
-  alias ChatOAuth2.User.Instance, as: UserInstance
-  alias ChatOAuth2.UserProvider.Instance, as: UserProviderInstance
+  alias ChatOAuth2.User
+  alias ChatOAuth2.UserProvider
 
   def introspect(_params, info) do
     Repo.get(User, CurrentUser.id(info))
@@ -24,8 +23,8 @@ defmodule ChatOAuth2.GraphQL.Resolver.User do
 
   def log_in_with_provider(params, _info) do
     with {:ok, data} <- get_provider_data(params),
-         {:ok, user} <- UserInstance.find_or_create_by_provider(data[:user], data[:provider]),
-         {:ok, _} <- UserProviderInstance.create_or_update_by(user, data[:provider]),
+         {:ok, user} <- User.find_or_create_by_provider(data[:user], data[:provider]),
+         {:ok, _} <- UserProvider.create_or_update_by(user, data[:provider]),
          {:ok, jwt, %{"exp" => expires}} <- Guardian.encode_and_sign(user, :access) do
       Logger.debug "Session: " <> inspect(%{token: jwt, token_expiration: expires, user: user})
       {:ok, %{token: jwt, token_expiration: expires, user: user}}

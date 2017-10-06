@@ -8,7 +8,6 @@ defmodule ChatOAuth2.Repo.Migrations.CreateUser do
       add :first_name, :string
       add :last_name, :string
       add :email, :string
-      add :password_hash, :string
       add :locale, :string
       timestamps()
     end
