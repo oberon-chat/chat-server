@@ -67,9 +67,14 @@ defmodule ChatServer.Schema.User do
   def filter_params(:guest, params) do
     %{
       type: "guest",
-      name: Map.get(params, "name", guest_name())
+      name: maybe_create_guest_name(params)
     }
   end
 
-  defp guest_name, do: "guest-" <> Util.String.random(6)
+  defp maybe_create_guest_name(params) do
+    case Map.get(params, "name", "") do
+      "" -> "guest-" <> Util.String.random(6)
+      name -> name
+    end
+  end
 end
