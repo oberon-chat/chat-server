@@ -12,6 +12,8 @@ defmodule ChatServer.Schema.User do
     field :name, :string
     field :type, :string, default: @default_type
 
+    many_to_many :groups, Schema.Group, join_through: "users_groups", on_delete: :delete_all, on_replace: :delete
+
     timestamps()
   end
 
@@ -23,6 +25,13 @@ defmodule ChatServer.Schema.User do
     |> validate_required(:name)
     |> update_change(:type, &downcase/1)
     |> validate_inclusion(:type, ["guest", "user"])
+  end
+
+  def groups_changeset(%User{id: _id} = struct, params) do
+    struct
+    |> Repo.preload([:groups])
+    |> cast(params, [])
+    |> put_assoc(:groups, Map.get(params, :groups, []))
   end
 
   defp downcase(value) when is_bitstring(value), do: String.downcase(value)
@@ -53,6 +62,12 @@ defmodule ChatServer.Schema.User do
   def update(%User{} = user, params) do
     user
     |> changeset(params)
+    |> Repo.update
+  end
+
+  def update_groups(%User{} = user, params) do
+    user
+    |> groups_changeset(params)
     |> Repo.update
   end
 

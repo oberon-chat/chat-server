@@ -15,7 +15,7 @@ defmodule ChatServer.Schema.Room do
     field :slug, :string
     field :name, :string
 
-    has_many :messages, ChatServer.Schema.Message
+    has_many :messages, Schema.Message
 
     timestamps()
   end
