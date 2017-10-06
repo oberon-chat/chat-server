@@ -1,4 +1,6 @@
 defmodule ChatServer.CreateMessage do
+  require Logger
+
   alias ChatServer.Schema
 
   @allowed_params ["body"]
@@ -10,7 +12,9 @@ defmodule ChatServer.CreateMessage do
          :ok <- broadcast_create(record) do
       {:ok, Schema.Message.preload(record, [:room, :user])}
     else
-      _ -> {:error, "Error creating message"}
+      error ->
+        Logger.debug "Error creating message " <> inspect(error)
+        {:error, "Error creating message"}
     end
   end
 

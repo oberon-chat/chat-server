@@ -21,9 +21,7 @@ defmodule ChatServer.CreateRoom do
   end
 
   defp create_record(params) do
-    name = Map.get(params, :name)
-
-    Schema.Room.get_or_create_by(:name, name, params)
+    Schema.Room.get_or_create_by(params)
   end
 
   defp broadcast_creation(room) do

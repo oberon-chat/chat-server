@@ -14,7 +14,7 @@ config :chat_oauth2,
 # Configures the endpoint
 config :chat_oauth2, ChatOAuth2Web.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "gFb++Kp/aZ3K/MpvPCHj8Vj4iQDKb2HgWcc3bucH+x2oPnaOXKdCxCa63xLgZM9j",
+  secret_key_base: System.get_env("CHAT_OAUTH2_SECRET_KEY_BASE"),
   render_errors: [view: ChatOAuth2Web.ErrorView, accepts: ~w(json)],
   pubsub: [name: ChatOAuth2.PubSub,
            adapter: Phoenix.PubSub.PG2]

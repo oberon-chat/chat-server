@@ -15,21 +15,34 @@ defmodule ChatServer.Schema.User do
     timestamps()
   end
 
-  def get(id) do
-    Repo.get(User, id)
+  # Changesets
+
+  def changeset(struct, params) do
+    struct
+    |> cast(params, [:id, :name, :type])
+    |> validate_required(:name)
+    |> update_change(:type, &downcase/1)
+    |> validate_inclusion(:type, ["guest", "user"])
   end
 
-  def get_by(key, value) do
-    params = Keyword.put([], key, value)
-    Repo.get_by(User, params)
-  end
+  defp downcase(value) when is_bitstring(value), do: String.downcase(value)
+  defp downcase(_), do: nil
 
-  def get_or_create_by(key, value, params) do
-    case get_by(key, value) do
+  # Queries
+
+  def get(id), do: Repo.get(User, id)
+
+  def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
+  def get_by(params), do: Repo.get_by(User, params)
+
+  def get_or_create_by(params) do
+    case get_by(params) do
       nil -> create(params)
       user -> {:ok, user}
     end
   end
+
+  # Mutations
 
   def create(params) do
     %User{}
@@ -43,14 +56,20 @@ defmodule ChatServer.Schema.User do
     |> Repo.update
   end
 
-  def changeset(struct, params) do
-    struct
-    |> cast(params, [:name, :type])
-    |> validate_required(:name)
-    |> update_change(:type, &downcase/1)
-    |> validate_inclusion(:type, ["guest", "user"])
+  # Data Functions
+
+  def filter_params(:user, params) do
+    Map.merge(
+      Map.take(params, [:id, :name]),
+      %{ type: "user" }
+    )
+  end
+  def filter_params(:guest, params) do
+    %{
+      type: "guest",
+      name: Map.get(params, "name", guest_name())
+    }
   end
 
-  defp downcase(value) when is_bitstring(value), do: String.downcase(value)
-  defp downcase(_), do: nil
+  defp guest_name, do: "guest-" <> Util.String.random(6)
 end

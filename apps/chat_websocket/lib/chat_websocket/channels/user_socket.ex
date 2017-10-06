@@ -3,7 +3,8 @@ defmodule ChatWebsocket.UserSocket do
 
   use Phoenix.Socket
 
-  alias ChatServer.Schema.User
+  alias ChatServer.Auth
+  alias ChatServer.Schema
 
   ## Channels
   channel "rooms", ChatWebsocket.RoomsChannel
@@ -24,10 +25,23 @@ defmodule ChatWebsocket.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(%{"user" => name}, socket) do
-    Logger.debug "Socket connection for user name" <> inspect(name)
 
-    case User.get_or_create_by(:name, name, %{name: name}) do
+  def connect(%{"token" => token}, socket) do
+    with {:ok, auth_user} <- Auth.get_user(token),
+         params <- Schema.User.filter_params(:user, auth_user),
+         {:ok, user} <- Schema.User.get_or_create_by(params) do
+      Logger.debug "Socket connection for user #{user.name} (#{user.id})"
+      {:ok, assign(socket, :user, user)}
+    else
+      _ -> :error
+    end
+  end
+  def connect(%{"type" => "guest"} = params, socket) do
+    params = Schema.User.filter_params(:guest, params)
+
+    Logger.debug "Socket connection for guest user #{Map.get(params, :name)}"
+
+    case Schema.User.get_or_create_by(params) do
       {:ok, user} -> {:ok, assign(socket, :user, user)}
       _ -> :error
     end
@@ -44,6 +58,6 @@ defmodule ChatWebsocket.UserSocket do
   #     ChatWebsocket.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
-  def id(%{socket: %{assigns: %{user: %{id: id, name: name}}}}), do: "user_socket:#{name}:#{id}"
+  def id(%{socket: %{assigns: %{user: %{id: id, name: name}}}}), do: "user_socket:#{id}:#{name}"
   def id(_socket), do: nil
 end

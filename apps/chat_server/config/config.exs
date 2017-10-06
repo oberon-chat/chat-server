@@ -5,7 +5,7 @@ use Mix.Config
 config :chat_server,
   ecto_repos: [ChatServer.Repo],
   namespace: ChatServer,
-  auth_client: ChatAuth.OAuth2
+  auth_client: ChatOAuth2.Client
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

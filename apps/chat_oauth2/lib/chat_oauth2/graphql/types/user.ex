@@ -7,7 +7,7 @@ defmodule ChatOAuth2.GraphQL.Types.User do
 
   object :user_queries do
     field :introspect, type: :user do
-      resolve with_login(&Resolver.User.instrospect/2)
+      resolve with_login(&Resolver.User.introspect/2)
     end
   end
 
