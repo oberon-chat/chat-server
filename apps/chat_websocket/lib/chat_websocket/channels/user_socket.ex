@@ -7,8 +7,9 @@ defmodule ChatWebsocket.UserSocket do
   alias ChatServer.Schema
 
   ## Channels
-  channel "rooms", ChatWebsocket.RoomsChannel
   channel "room:*", ChatWebsocket.RoomChannel
+  channel "rooms", ChatWebsocket.RoomsChannel
+  channel "users", ChatWebsocket.UsersChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
