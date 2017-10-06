@@ -13,9 +13,23 @@ defmodule ChatServer.Schema.Message do
     timestamps()
   end
 
+  # Changesets
+
+  def changeset(struct, params) do
+    struct
+    |> cast(params, [:body, :edited, :room_id, :user_id])
+    |> validate_required(:body)
+    |> assoc_constraint(:room)
+    |> assoc_constraint(:user)
+  end
+
+  # Queries
+
   def get(id) do
     Repo.get(Message, id)
   end
+
+  # Mutations
 
   def create(params) do
     %Message{}
@@ -31,13 +45,5 @@ defmodule ChatServer.Schema.Message do
 
   def delete(%Message{} = message) do
     Repo.delete(message)
-  end
-
-  def changeset(struct, params) do
-    struct
-    |> cast(params, [:body, :edited, :room_id, :user_id])
-    |> validate_required(:body)
-    |> assoc_constraint(:room)
-    |> assoc_constraint(:user)
   end
 end

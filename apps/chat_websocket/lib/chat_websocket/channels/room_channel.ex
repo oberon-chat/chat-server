@@ -10,7 +10,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.UpdateMessage
 
   def join("room:" <> name, _, socket) do
-    case Schema.Room.get_by(:name, name) do
+    case Schema.Room.get_by(name: name) do
       nil -> {:error, "Room #{name} does not exist"}
       room -> join_room(socket, room)
     end

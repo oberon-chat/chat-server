@@ -2,10 +2,10 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-config :chat_server, ecto_repos: [ChatServer.Repo]
-
 config :chat_server,
-  namespace: ChatServer
+  ecto_repos: [ChatServer.Repo],
+  namespace: ChatServer,
+  auth_client: ChatOAuth2.Client
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
