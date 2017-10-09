@@ -15,10 +15,10 @@ env:
 elixir: 1.5
 otp_release: 20.0
 
-# matrix:
-#   include:
-#     - elixir: 1.4
-#       otp_release: 20.0
+matrix:
+  include:
+    - elixir: 1.4
+      otp_release: 20.0
   # allow_failures:
   #   - elixir: 1.3
   #     otp_release: 19.3
