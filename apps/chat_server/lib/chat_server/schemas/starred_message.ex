@@ -21,7 +21,6 @@ defmodule ChatServer.Schema.StarredMessage do
     Repo.delete(starred_message)
   end
 
-
   def changeset(struct, params) do
     struct
     |> cast(params, [:message_id, :user_id])
