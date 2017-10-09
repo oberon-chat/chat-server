@@ -6,7 +6,7 @@ notifications:
     on_failure: never
 
 addons:
-  postgresql: "9.4"
+  postgresql: "9.6"
 
 env:
   global:
@@ -25,8 +25,8 @@ otp_release: 20.0
 
 before_install:
   - cp .envrc.travis .envrc
-  - source .envrc && mix local.rebar --force
+  - source .envrc
+  - mix local.rebar --force
 
 before_script:
-  - source .envrc
   - mix do ecto.create, ecto.migrate
