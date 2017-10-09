@@ -1,5 +1,8 @@
 language: elixir
 
+elixir: 1.5
+otp_release: 20.0
+
 notifications:
   email:
     on_success: never
@@ -16,9 +19,6 @@ cache:
 env:
   global:
     - MIX_ENV=test
-
-elixir: 1.5
-otp_release: 20.0
 
 matrix:
   include:
