@@ -8,6 +8,11 @@ notifications:
 addons:
   postgresql: "9.6"
 
+cache:
+  directories:
+    - _build
+    - deps
+
 env:
   global:
     - MIX_ENV=test
