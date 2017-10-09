@@ -7,8 +7,8 @@ defmodule ChatServer.Schema.Message do
     field :body, :string
     field :edited, :boolean, default: false
 
-    belongs_to :room, ChatServer.Schema.Room
-    belongs_to :user, ChatServer.Schema.User
+    belongs_to :room, Schema.Room
+    belongs_to :user, Schema.User
 
     timestamps()
   end

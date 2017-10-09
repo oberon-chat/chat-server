@@ -9,6 +9,7 @@ defmodule ChatServer.Schema do
 
       alias __MODULE__
       alias ChatServer.Repo
+      alias ChatServer.Schema
 
       @primary_key {:id, :binary_id, autogenerate: true}
       @foreign_key_type :binary_id
