@@ -25,7 +25,7 @@ otp_release: 20.0
 
 before_install:
   - cp .envrc.travis .envrc
-  # - mix local.rebar --force
+  - source .envrc && mix local.rebar --force
 
 before_script:
   - source .envrc
