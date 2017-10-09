@@ -1,0 +1,27 @@
+language: elixir
+
+addons:
+  postgresql: "9.4"
+
+env:
+  global:
+    - MIX_ENV=test
+
+elixir: 1.5
+otp_release: 20.0
+
+matrix:
+  include:
+    - elixir: 1.4
+      otp_release: 20.0
+  # allow_failures:
+  #   - elixir: 1.3
+  #     otp_release: 19.3
+
+before_install:
+  - cp .envrc.travis .envrc
+  - mix local.rebar --force
+
+before_script:
+  - source .envrc
+  - mix do ecto.create, ecto.migrate
