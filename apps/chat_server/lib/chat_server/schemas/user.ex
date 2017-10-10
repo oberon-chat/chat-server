@@ -26,7 +26,7 @@ defmodule ChatServer.Schema.User do
     |> validate_inclusion(:type, ["guest", "user"])
   end
 
-  def groups_changeset(%User{id: _id} = struct, params) do
+  def update_groups_changeset(%User{id: _id} = struct, params) do
     struct
     |> Repo.preload([:groups])
     |> cast(params, [])
@@ -66,7 +66,7 @@ defmodule ChatServer.Schema.User do
 
   def update_groups(%User{} = user, params) do
     user
-    |> groups_changeset(params)
+    |> update_groups_changeset(params)
     |> Repo.update
   end
 

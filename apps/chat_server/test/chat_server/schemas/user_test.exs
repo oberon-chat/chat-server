@@ -16,16 +16,6 @@ defmodule ChatServer.Schema.UserTest do
       {:ok, group: group, user: user}
     end
 
-    test "cannot be inserted, must be updated instead", %{group: group, user: user} do
-      params = %{groups: [group]}
-
-      assert_raise Ecto.ConstraintError, fn () ->
-        user
-        |> User.groups_changeset(params)
-        |> Repo.insert
-      end
-    end
-
     test "is successfully updated when groups are included in params", %{group: group, user: user} do
       params = %{groups: [group]}
       {:ok, user} = User.update_groups(user, params)
