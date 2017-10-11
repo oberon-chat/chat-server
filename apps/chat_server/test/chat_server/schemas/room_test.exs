@@ -3,6 +3,8 @@ defmodule ChatServer.Schema.RoomTest do
   alias ChatServer.Schema.Room
   alias ChatServer.Repo
 
+  import ChatServer.Factory
+
   use ExUnit.Case
 
   setup do
@@ -110,10 +112,10 @@ defmodule ChatServer.Schema.RoomTest do
 
   describe "queries - get_messages" do
     setup do
-      {:ok, room} = Room.create(%{name: "test room"})
-      {:ok, message_one} = Message.create(%{body: "one", room_id: room.id})
-      {:ok, message_two} = Message.create(%{body: "two", room_id: room.id})
-      {:ok, message_three} = Message.create(%{body: "three", room_id: room.id})
+      room = insert(:room)
+      message_one = insert(:message, %{body: "one", room: room})
+      message_two = insert(:message, %{body: "two", room: room})
+      message_three = insert(:message, %{body: "three", room: room})
 
       {:ok, room: room, message_one: message_one, message_two: message_two, message_three: message_three}
     end

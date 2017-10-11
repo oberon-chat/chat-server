@@ -36,6 +36,7 @@ defmodule ChatServer.Mixfile do
       {:chat_pubsub, in_umbrella: true},
       {:ecto, "~> 2.0"},
       {:postgrex, "~> 0.13"},
+      {:ex_machina, "~> 2.1", only: :test},
       {:scrivener_ecto, "~> 1.2"}
     ]
   end
