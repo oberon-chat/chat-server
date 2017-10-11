@@ -19,6 +19,7 @@ defmodule ChatServer.Schema.Room do
     field :name, :string
 
     has_many :messages, Schema.Message
+    many_to_many :users, Schema.User, join_through: "users_rooms", on_delete: :delete_all, on_replace: :delete
 
     timestamps()
   end
