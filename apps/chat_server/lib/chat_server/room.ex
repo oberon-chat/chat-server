@@ -3,6 +3,7 @@ defmodule ChatServer.Room do
 
   alias ChatServer.RoomSupervisor
   alias ChatServer.TrackRooms
+  alias ChatServer.Schema
 
   defmodule State do
     defstruct [:room, messages: []]
@@ -45,6 +46,13 @@ defmodule ChatServer.Room do
     GenServer.call(pid, :get_messages)
   end
 
+  def create_message(%Phoenix.Socket{} = socket, msg) do
+    GenServer.call(get_pid(socket), {:create_message, msg})
+  end
+  def create_message(pid, msg) do
+    GenServer.call(pid, {:create_message, msg})
+  end
+
   def update_message(%Phoenix.Socket{} = socket, message) do
     GenServer.call(get_pid(socket), {:update_message, message})
   end
@@ -59,15 +67,8 @@ defmodule ChatServer.Room do
     GenServer.call(pid, {:delete_message, message})
   end
 
-  def create_message(%Phoenix.Socket{} = socket, msg) do
-    GenServer.call(get_pid(socket), {:create_message, msg})
-  end
-  def create_message(pid, msg) do
-    GenServer.call(pid, {:create_message, msg})
-  end
-
   def init(room) do
-    {:ok, %State{room: room}}
+    {:ok, %State{room: room, messages: Schema.Room.get_messages(room)}}
   end
 
   def handle_call({:get_name}, _from, %{room: room} = state) do

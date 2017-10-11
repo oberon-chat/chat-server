@@ -1,6 +1,8 @@
 defmodule ChatServer.Schema.Room do
   use ChatServer.Schema
 
+  import Ecto.Query, only: [from: 2]
+
   @derive {
     Poison.Encoder,
     except: [:__meta__, :inserted_at, :updated_at]
@@ -8,6 +10,7 @@ defmodule ChatServer.Schema.Room do
 
   @default_type "persistent"
   @default_status "active"
+  @default_messages_limit 50
 
   schema "rooms" do
     field :type, :string, default: @default_type
@@ -50,8 +53,10 @@ defmodule ChatServer.Schema.Room do
 
   def all, do: Repo.all(__MODULE__)
 
+  def get(id), do: Repo.get(__MODULE__, id)
+
   def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
-  def get_by(params), do: Repo.get_by(Room, params)
+  def get_by(params), do: Repo.get_by(__MODULE__, params)
 
   def get_or_create_by(params) do
     case get_by(params) do
@@ -60,10 +65,36 @@ defmodule ChatServer.Schema.Room do
     end
   end
 
+  def get_messages(id, opts \\ [])
+  def get_messages(id, opts) when is_bitstring(id) do
+    __MODULE__
+    |> Repo.get(id)
+    |> get_messages(opts)
+  end
+  def get_messages(%__MODULE__{} = room, opts) do
+    room
+    |> Repo.preload([messages: messages_query(opts)])
+    |> Map.get(:messages)
+    |> Repo.preload([:room, :user])
+  end
+
+  defp messages_query(opts \\ [])
+  defp messages_query([inserted_after: inserted_after] = opts) do
+    from m in Schema.Message,
+    order_by: [desc: m.inserted_at],
+    where: m.inserted_at > ^inserted_after,
+    limit: ^Keyword.get(opts, :limit, @default_messages_limit)
+  end
+  defp messages_query(opts) do
+    from m in Schema.Message,
+    order_by: [desc: m.inserted_at],
+    limit: ^Keyword.get(opts, :limit, @default_messages_limit)
+  end
+
   # Mutations
 
   def create(params) do
-    %Room{}
+    %__MODULE__{}
     |> changeset(params)
     |> Repo.insert
   end
