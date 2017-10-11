@@ -3,6 +3,7 @@ defmodule ChatServer.Room do
 
   alias ChatServer.RoomSupervisor
   alias ChatServer.TrackRooms
+  alias ChatServer.Schema
 
   defmodule State do
     defstruct [:room, messages: []]
@@ -67,7 +68,7 @@ defmodule ChatServer.Room do
   end
 
   def init(room) do
-    {:ok, %State{room: room}}
+    {:ok, %State{room: room, messages: Schema.Room.get_messages(room)}}
   end
 
   def handle_call({:get_name}, _from, %{room: room} = state) do

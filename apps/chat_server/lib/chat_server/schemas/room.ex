@@ -71,22 +71,23 @@ defmodule ChatServer.Schema.Room do
     |> Repo.get(id)
     |> get_messages(opts)
   end
-  def get_messages(%__MODULE__{} = record, opts) do
-    record
+  def get_messages(%__MODULE__{} = room, opts) do
+    room
     |> Repo.preload([messages: messages_query(opts)])
     |> Map.get(:messages)
+    |> Repo.preload([:room, :user])
   end
 
   defp messages_query(opts \\ [])
   defp messages_query([inserted_after: inserted_after] = opts) do
     from m in Schema.Message,
-    order_by: m.inserted_at,
+    order_by: [desc: m.inserted_at],
     where: m.inserted_at > ^inserted_after,
     limit: ^Keyword.get(opts, :limit, @default_messages_limit)
   end
   defp messages_query(opts) do
     from m in Schema.Message,
-    order_by: m.inserted_at,
+    order_by: [desc: m.inserted_at],
     limit: ^Keyword.get(opts, :limit, @default_messages_limit)
   end
 
