@@ -16,12 +16,6 @@ defmodule ChatServer.CreateSubscriptionTest do
       room = insert(:room) |> Repo.preload([:users])
       user = insert(:user) |> Repo.preload([:rooms])
 
-      # {:ok, room} = Schema.Room.create(%{name: "Test Room 2"})
-      # {:ok, user} = Schema.User.create(%{name: "Test Room 3"})
-
-      # user = Repo.preload(user, [:rooms])
-      # room = Repo.preload(room, [:users])
-
       {:ok, room: room, user: user}
     end
 

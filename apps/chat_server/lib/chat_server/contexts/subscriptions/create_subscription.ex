@@ -2,6 +2,9 @@ defmodule ChatServer.CreateSubscription do
   alias ChatServer.Repo
   alias ChatServer.Schema
 
+  # TODO: confirm user is allowed to subscribe to rooms
+  # TODO: confirm room allows new subscriptions
+
   def call(user, room_id) when is_bitstring(room_id) do
     room = Repo.get(Schema.Room, room_id)
     call(user, room)
@@ -11,13 +14,7 @@ defmodule ChatServer.CreateSubscription do
     call(user, room)
   end
   def call(%Schema.User{} = user, %Schema.Room{} = room) do
-    user = Repo.preload(user, [:rooms])
-    rooms = [room | user.rooms]
-    params = %{rooms: rooms}
-
-    case Schema.User.update_rooms(user, params) do
-      {:ok, user} -> user
-      _ -> false
-    end
+    %{room: room, user: user}
+    |> Schema.Subscription.create
   end
 end
