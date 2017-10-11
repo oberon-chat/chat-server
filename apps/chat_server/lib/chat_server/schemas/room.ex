@@ -10,7 +10,7 @@ defmodule ChatServer.Schema.Room do
 
   @default_type "persistent"
   @default_status "active"
-  @messages_limit 50
+  @default_messages_limit 50
 
   schema "rooms" do
     field :type, :string, default: @default_type
@@ -65,27 +65,29 @@ defmodule ChatServer.Schema.Room do
     end
   end
 
-  def get_messages(id) when is_bitstring(id) do
+  def get_messages(id, opts \\ [])
+  def get_messages(id, opts) when is_bitstring(id) do
     __MODULE__
     |> Repo.get(id)
-    |> get_messages
+    |> get_messages(opts)
   end
-  def get_messages(%__MODULE__{} = record, inserted_after \\ nil, limit \\ @messages_limit) do
+  def get_messages(%__MODULE__{} = record, opts) do
     record
-    |> Repo.preload([messages: messages_query(inserted_after, limit)])
+    |> Repo.preload([messages: messages_query(opts)])
     |> Map.get(:messages)
   end
 
-  defp messages_query(nil, limit) do
-    from m in Schema.Message,
-    order_by: m.inserted_at,
-    limit: ^limit
-  end
-  defp messages_query(inserted_after, limit) do
+  defp messages_query(opts \\ [])
+  defp messages_query([inserted_after: inserted_after] = opts) do
     from m in Schema.Message,
     order_by: m.inserted_at,
     where: m.inserted_at > ^inserted_after,
-    limit: ^limit
+    limit: ^Keyword.get(opts, :limit, @default_messages_limit)
+  end
+  defp messages_query(opts) do
+    from m in Schema.Message,
+    order_by: m.inserted_at,
+    limit: ^Keyword.get(opts, :limit, @default_messages_limit)
   end
 
   # Mutations

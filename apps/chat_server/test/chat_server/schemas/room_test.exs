@@ -1,5 +1,4 @@
 defmodule ChatServer.Schema.RoomTest do
-  alias ChatServer.Schema.Message
   alias ChatServer.Schema.Room
   alias ChatServer.Repo
 
@@ -131,12 +130,12 @@ defmodule ChatServer.Schema.RoomTest do
     end
 
     test "when passed an optional inserted_after argument", %{room: room, message_one: message_one} do
-      result = Room.get_messages(room, message_one.inserted_at)
+      result = Room.get_messages(room, inserted_after: message_one.inserted_at)
       assert length(result) == 2
     end
 
     test "when passed an optional limit argument", %{room: room} do
-      result = Room.get_messages(room, nil, 1)
+      result = Room.get_messages(room, limit: 1)
       assert length(result) == 1
     end
   end
