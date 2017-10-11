@@ -1,4 +1,5 @@
 defmodule ChatServer.Schema.RoomTest do
+  alias ChatServer.Schema.Message
   alias ChatServer.Schema.Room
   alias ChatServer.Repo
 
@@ -104,6 +105,37 @@ defmodule ChatServer.Schema.RoomTest do
       assert {:error, _} = %Room{}
         |> Room.changeset(%{name: "hello", status: "active"})
         |> Repo.insert
+    end
+  end
+
+  describe "queries - get_messages" do
+    setup do
+      {:ok, room} = Room.create(%{name: "test room"})
+      {:ok, message_one} = Message.create(%{body: "one", room_id: room.id})
+      {:ok, message_two} = Message.create(%{body: "two", room_id: room.id})
+      {:ok, message_three} = Message.create(%{body: "three", room_id: room.id})
+
+      {:ok, room: room, message_one: message_one, message_two: message_two, message_three: message_three}
+    end
+
+    test "when passed a uuid it returns all values up to default limit", %{room: room} do
+      result = Room.get_messages(room.id)
+      assert length(result) == 3
+    end
+
+    test "when passed a room record it returns all values up to default limit", %{room: room} do
+      result = Room.get_messages(room)
+      assert length(result) == 3
+    end
+
+    test "when passed an optional inserted_after argument", %{room: room, message_one: message_one} do
+      result = Room.get_messages(room, message_one.inserted_at)
+      assert length(result) == 2
+    end
+
+    test "when passed an optional limit argument", %{room: room} do
+      result = Room.get_messages(room, nil, 1)
+      assert length(result) == 1
     end
   end
 end

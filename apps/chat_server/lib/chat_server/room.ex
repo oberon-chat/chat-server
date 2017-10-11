@@ -45,6 +45,13 @@ defmodule ChatServer.Room do
     GenServer.call(pid, :get_messages)
   end
 
+  def create_message(%Phoenix.Socket{} = socket, msg) do
+    GenServer.call(get_pid(socket), {:create_message, msg})
+  end
+  def create_message(pid, msg) do
+    GenServer.call(pid, {:create_message, msg})
+  end
+
   def update_message(%Phoenix.Socket{} = socket, message) do
     GenServer.call(get_pid(socket), {:update_message, message})
   end
@@ -57,13 +64,6 @@ defmodule ChatServer.Room do
   end
   def delete_message(pid, message) do
     GenServer.call(pid, {:delete_message, message})
-  end
-
-  def create_message(%Phoenix.Socket{} = socket, msg) do
-    GenServer.call(get_pid(socket), {:create_message, msg})
-  end
-  def create_message(pid, msg) do
-    GenServer.call(pid, {:create_message, msg})
   end
 
   def init(room) do

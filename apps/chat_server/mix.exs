@@ -25,6 +25,7 @@ defmodule ChatServer.Mixfile do
         :logger,
         :postgrex,
         :ecto,
+        :scrivener_ecto,
         :chat_pubsub
       ]
     ]
@@ -34,7 +35,8 @@ defmodule ChatServer.Mixfile do
     [
       {:chat_pubsub, in_umbrella: true},
       {:ecto, "~> 2.0"},
-      {:postgrex, "~> 0.13"}
+      {:postgrex, "~> 0.13"},
+      {:scrivener_ecto, "~> 1.2"}
     ]
   end
 
