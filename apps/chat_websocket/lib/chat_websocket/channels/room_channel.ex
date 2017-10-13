@@ -4,6 +4,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.Room
   alias ChatServer.Schema
   alias ChatServer.CreateMessage
+  alias ChatServer.CreateSubscription
   alias ChatServer.DeleteMessage
   alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
@@ -34,6 +35,16 @@ defmodule ChatWebsocket.RoomChannel do
 
   def handle_out(event, msg, socket) do
     push socket, event, msg
+
+    {:noreply, socket}
+  end
+
+  def handle_in("room:subscribe", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, subscription} <- CreateSubscription.call(user, room) do
+      push socket, "room:subscribed", subscription
+    end
 
     {:noreply, socket}
   end

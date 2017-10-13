@@ -2,6 +2,8 @@ defmodule ChatWebsocket.RoomsChannel do
   use Phoenix.Channel
 
   alias ChatServer.CreateRoom
+  alias ChatServer.CreateSubscription
+  alias ChatServer.ListSubscriptions
   alias ChatServer.StartRoom
   alias ChatServer.TrackRooms
 
@@ -12,7 +14,10 @@ defmodule ChatWebsocket.RoomsChannel do
   end
 
   def handle_info(:after_join, socket) do
+    %{user: user} = socket.assigns
+
     push socket, "presence_state", TrackRooms.list
+    push socket, "room:subscriptions", ListSubscriptions.call(user)
 
     {:noreply, socket}
   end
@@ -23,10 +28,12 @@ defmodule ChatWebsocket.RoomsChannel do
     {:noreply, socket}
   end
 
-  def handle_in("rooms:create", name, socket) do
-    case CreateRoom.call(%{name: name}) do
-      {:ok, record} -> StartRoom.call(record)
-      _ -> nil
+  def handle_in("rooms:create", %{"name" => name}, socket) do
+    %{user: user} = socket.assigns
+
+    with {:ok, record} <- CreateRoom.call(%{name: name}),
+         {:ok, _} <- CreateSubscription.call(user, record) do
+      StartRoom.call(record)
     end
 
     {:noreply, socket}
