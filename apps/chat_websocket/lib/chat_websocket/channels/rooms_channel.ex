@@ -13,17 +13,14 @@ defmodule ChatWebsocket.RoomsChannel do
     {:ok, socket}
   end
 
+  # Callbacks
+
   def handle_info(:after_join, socket) do
     %{user: user} = socket.assigns
+    subscriptions = ListSubscriptions.call(user)
 
-    push socket, "presence_state", TrackRooms.list
-    push socket, "room:subscriptions", ListSubscriptions.call(user)
-
-    {:noreply, socket}
-  end
-
-  def handle_out(event, msg, socket) do
-    push socket, event, msg
+    push socket, "rooms:state", TrackRooms.list
+    push socket, "room:subscriptions", %{subscriptions: subscriptions}
 
     {:noreply, socket}
   end
@@ -32,9 +29,25 @@ defmodule ChatWebsocket.RoomsChannel do
     %{user: user} = socket.assigns
 
     with {:ok, record} <- CreateRoom.call(%{name: name}),
-         {:ok, _} <- CreateSubscription.call(user, record) do
-      StartRoom.call(record)
+         {:ok, subscription} <- CreateSubscription.call(user, record),
+         {:ok, pid} <- StartRoom.call(record) do
+      push socket, "room:subscribed", subscription
     end
+
+    {:noreply, socket}
+  end
+
+  # Filters
+
+  intercept ["presence_diff"]
+
+  def handle_out("presence_diff", msg, socket) do
+    push socket, "rooms:diff", msg
+
+    {:noreply, socket}
+  end
+  def handle_out(event, msg, socket) do
+    push socket, event, msg
 
     {:noreply, socket}
   end
