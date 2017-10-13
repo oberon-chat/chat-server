@@ -12,6 +12,9 @@ defmodule ChatServer.Schema.User do
     field :name, :string
     field :type, :string, default: @default_type
 
+    has_many :subscriptions, Schema.Subscription, on_delete: :delete_all
+    has_many :rooms, through: [:subscriptions, :room]
+
     many_to_many :groups, Schema.Group, join_through: "users_groups", on_delete: :delete_all, on_replace: :delete
 
     timestamps()

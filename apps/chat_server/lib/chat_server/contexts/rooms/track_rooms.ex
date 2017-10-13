@@ -2,7 +2,6 @@ defmodule ChatServer.TrackRooms do
   require Logger
 
   alias ChatPubSub.Presence
-  alias ChatServer.Room
 
   @presence_key "rooms"
 

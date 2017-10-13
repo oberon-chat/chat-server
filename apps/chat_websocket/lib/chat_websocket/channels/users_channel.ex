@@ -7,11 +7,15 @@ defmodule ChatWebsocket.UsersChannel do
     {:ok, socket}
   end
 
+  # Callbacks
+
   def handle_info(:after_join, socket) do
     push socket, "users:current", socket.assigns.user
 
     {:noreply, socket}
   end
+
+  # Filters
 
   def handle_out(event, msg, socket) do
     push socket, event, msg
