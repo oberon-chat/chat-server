@@ -68,6 +68,7 @@ defmodule ChatServer.Room do
   end
 
   def init(room) do
+    {:ok, _} = TrackRooms.track(self(), room)
     {:ok, %State{room: room, messages: Schema.Room.get_messages(room)}}
   end
 

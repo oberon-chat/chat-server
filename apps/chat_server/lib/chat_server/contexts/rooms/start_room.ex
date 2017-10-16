@@ -2,7 +2,6 @@ defmodule ChatServer.StartRoom do
   require Logger
 
   alias ChatServer.Room
-  alias ChatServer.TrackRooms
 
   defmodule State do
     @derive {Poison.Encoder, only: [room: [:id, :slug, :name]]}
@@ -14,7 +13,6 @@ defmodule ChatServer.StartRoom do
     Logger.info "Starting room #{room.name} (#{room.id})"
 
     with {:ok, pid} <- Room.start(room),
-         {:ok, _} <- TrackRooms.track(pid, room),
          :ok <- broadcast_start(room, pid) do
       {:ok, pid}
     else
