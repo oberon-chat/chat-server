@@ -8,7 +8,7 @@ defmodule ChatServer.Schema.Room do
     except: [:__meta__, :inserted_at, :updated_at]
   }
 
-  @default_type "persistent"
+  @default_type "public"
   @default_status "active"
   @default_messages_limit 50
 
@@ -34,7 +34,7 @@ defmodule ChatServer.Schema.Room do
     |> update_change(:type, &downcase/1)
     |> validate_required(:name)
     |> validate_inclusion(:status, ["active", "archived"])
-    |> validate_inclusion(:type, ["persistent", "transient"])
+    |> validate_inclusion(:type, ["public", "private", "direct", "support"])
     |> unique_constraint(:name, name: :rooms_name_status_index)
     |> create_slug
   end
