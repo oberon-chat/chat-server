@@ -4,7 +4,7 @@ defmodule ChatWebsocket.RoomsChannel do
   alias ChatServer.CreateRoom
   alias ChatServer.CreateSubscription
   alias ChatServer.ListSubscriptions
-  alias ChatServer.StartRoom
+  alias ChatServer.Room
   alias ChatServer.TrackRooms
 
   def join("rooms", _, socket) do
@@ -30,7 +30,7 @@ defmodule ChatWebsocket.RoomsChannel do
 
     with {:ok, record} <- CreateRoom.call(%{name: name}),
          {:ok, subscription} <- CreateSubscription.call(user, record),
-         {:ok, pid} <- StartRoom.call(record) do
+         {:ok, pid} <- Room.start(record) do
       push socket, "room:subscribed", subscription
     end
 

@@ -1,8 +1,8 @@
 defmodule ChatServer.RoomInitializer do
   use GenServer
 
+  alias ChatServer.Room
   alias ChatServer.Schema
-  alias ChatServer.StartRoom
 
   defmodule State do
     defstruct started: []
@@ -18,6 +18,6 @@ defmodule ChatServer.RoomInitializer do
 
   defp start_rooms do
     Schema.Room.all
-    |> Enum.map(&StartRoom.call/1)
+    |> Enum.map(&Room.start/1)
   end
 end
