@@ -1,20 +1,20 @@
 defmodule ChatServer.DeleteStarredMessage do
   alias ChatServer.Schema
 
-  def call(params, user) do
-    with record <- get_record(params) do
-         delete_record(record)
-        #  TODO do i want to broadcast or push this?
+  def call(params, user, message) do
+    with record <- get_record(user, message),
+         {:ok, _record} <- delete_record(record) do
+      {:ok, Map.get(params,"id")}
+    else
+      _ -> {:error, "Error deleting starred message"}
     end
   end
 
-  defp get_record(params) do
-    params
-    |> Map.get("id")
-    |> Schema.StarredMessage.get(:message_id)
+  defp get_record(user, message) do
+    Schema.StarredMessage.find_by_message_and_user(user, message)
   end
 
   defp delete_record(record) do
-    Scheme.StarredMessage.delete(record)
+    Schema.StarredMessage.delete(record)
   end
 end
