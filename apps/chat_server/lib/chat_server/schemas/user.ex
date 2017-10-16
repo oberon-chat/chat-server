@@ -38,7 +38,7 @@ defmodule ChatServer.Schema.User do
 
   # Queries
 
-  def get(id), do: Repo.get(User, id), preload :starred_messages
+  def get(id), do: Repo.get(User, id)
 
   def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
   def get_by(params), do: Repo.get_by(User, params)
