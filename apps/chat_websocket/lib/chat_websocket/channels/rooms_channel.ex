@@ -30,12 +30,15 @@ defmodule ChatWebsocket.RoomsChannel do
 
     with {:ok, record} <- CreateRoom.call(%{name: name}),
          {:ok, subscription} <- CreateSubscription.call(user, record),
-         {:ok, pid} <- Room.start(record) do
+         {:ok, _} <- Room.start(record) do
       push socket, "room:subscribed", subscription
+      reply(:ok, %{room: record}, socket)
+    else
+      _ -> reply(:error, "Error creating socket", socket)
     end
-
-    {:noreply, socket}
   end
+
+  defp reply(type, value, socket), do: {:reply, {type, value}, socket}
 
   # Filters
 

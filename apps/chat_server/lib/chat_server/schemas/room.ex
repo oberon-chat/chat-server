@@ -36,6 +36,7 @@ defmodule ChatServer.Schema.Room do
     |> validate_inclusion(:status, ["active", "archived"])
     |> validate_inclusion(:type, ["public", "private", "direct", "support"])
     |> unique_constraint(:name, name: :rooms_name_status_index)
+    |> unique_constraint(:slug, slug: :rooms_slug_status_index)
     |> create_slug
   end
 

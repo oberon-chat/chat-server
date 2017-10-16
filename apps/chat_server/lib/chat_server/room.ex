@@ -20,18 +20,16 @@ defmodule ChatServer.Room do
   end
 
   def stop(room_pid) do
-    name = get_name(room_pid)
-
     with :ok <- Supervisor.terminate_child(RoomSupervisor, room_pid) do
-      ChatPubSub.broadcast! "rooms", "room:deleted", %{room: name}
+      ChatPubSub.broadcast! "rooms", "room:deleted", %{room: get_slug(room_pid)}
     end
   end
 
-  def get_name(%Phoenix.Socket{} = socket) do
-    GenServer.call(get_pid(socket), {:get_name})
+  def get_slug(%Phoenix.Socket{} = socket) do
+    GenServer.call(get_pid(socket), {:get_slug})
   end
-  def get_name(pid) do
-    GenServer.call(pid, {:get_name})
+  def get_slug(pid) do
+    GenServer.call(pid, {:get_slug})
   end
 
   def get_message(%Phoenix.Socket{} = socket, id) do
@@ -72,7 +70,7 @@ defmodule ChatServer.Room do
   # Callbacks
 
   def init(room) do
-    Logger.info "Started room process #{room.name} (#{room.id})"
+    Logger.info "Started room process #{room.slug} (#{room.id})"
 
     {:ok, _} = TrackRooms.track(self(), room)
     messages = Schema.Room.get_messages(room)
@@ -80,8 +78,8 @@ defmodule ChatServer.Room do
     {:ok, %State{room: room, last_message: get_last(messages), messages: messages}}
   end
 
-  def handle_call({:get_name}, _from, %{room: room} = state) do
-    {:reply, %{name: room.name}, state}
+  def handle_call({:get_slug}, _from, %{room: room} = state) do
+    {:reply, %{slug: room.slug}, state}
   end
 
   def handle_call({:get_message, id}, _from, %{messages: messages} = state) do
