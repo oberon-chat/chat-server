@@ -9,6 +9,7 @@ defmodule ChatServer.TrackRooms do
     case get_room_pid(key(room)) do
       nil ->
         Presence.track(pid, @presence_key, key(room), %{
+          id: room.id,
           name: room.name,
           pid: Util.Pid.serialize(pid)
         })
