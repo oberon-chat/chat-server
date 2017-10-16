@@ -1,7 +1,7 @@
 defmodule ChatServer.Schema.Room do
   use ChatServer.Schema
 
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query, only: [from: 2, where: 2]
 
   @derive {
     Poison.Encoder,
@@ -54,6 +54,8 @@ defmodule ChatServer.Schema.Room do
   # Queries
 
   def all, do: Repo.all(__MODULE__)
+
+  def active, do: __MODULE__ |> where(status: "active") |> Repo.all
 
   def get(id), do: Repo.get(__MODULE__, id)
 

@@ -17,7 +17,7 @@ defmodule ChatServer.RoomInitializer do
   end
 
   defp start_rooms do
-    Schema.Room.all
+    Schema.Room.active
     |> Enum.map(&Room.start/1)
   end
 end
