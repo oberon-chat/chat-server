@@ -10,7 +10,6 @@ defmodule ChatServer.TrackRooms do
       nil ->
         Presence.track(pid, @presence_key, key(room), %{
           name: room.name,
-          last_message: nil,
           pid: Util.Pid.serialize(pid)
         })
       _existing_pid ->

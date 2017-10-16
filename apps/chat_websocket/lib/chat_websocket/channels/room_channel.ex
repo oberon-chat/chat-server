@@ -6,7 +6,6 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.CreateMessage
   alias ChatServer.CreateSubscription
   alias ChatServer.DeleteMessage
-  alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
   alias ChatServer.UpdateMessage
 
@@ -48,7 +47,6 @@ defmodule ChatWebsocket.RoomChannel do
 
     with {:ok, record} <- CreateMessage.call(params, room, user),
          {:ok, _} <- Room.create_message(socket, record) do
-      TrackRooms.update(room, %{last_message: record})
       broadcast! socket, "message:created", record
     end
 

@@ -6,7 +6,7 @@ defmodule ChatServer.Room do
   alias ChatServer.Schema
 
   defmodule State do
-    defstruct [:room, messages: []]
+    defstruct [:room, :last_message, messages: []]
   end
 
   def start(room) do
@@ -85,7 +85,7 @@ defmodule ChatServer.Room do
   end
 
   def handle_call({:create_message, message}, _from, %{messages: messages} = state) do
-    {:reply, {:ok, message}, %{state | messages: [message | messages]}}
+    {:reply, {:ok, message}, %{state | last_message: message, messages: [message | messages]}}
   end
 
   def handle_call({:update_message, message}, _from, %{messages: messages} = state) do
@@ -96,9 +96,9 @@ defmodule ChatServer.Room do
   end
 
   def handle_call({:delete_message, message}, _from, %{messages: messages} = state) do
-    id = Map.get(message, "id")
+    remaining = remove_message(messages, Map.get(message, "id"))
 
-    {:reply, {:ok, message}, %{state | messages: remove_message(messages, id)}}
+    {:reply, {:ok, message}, %{state | last_message: hd(remaining), messages: remaining}}
   end
 
   def handle_info(_message, state) do
