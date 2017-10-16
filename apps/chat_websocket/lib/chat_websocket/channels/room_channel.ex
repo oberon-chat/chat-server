@@ -8,6 +8,9 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
   alias ChatServer.UpdateMessage
+  alias ChatServer.CreateStarredMessage
+  alias ChatServer.DeleteStarredMessage
+  alias ChatServer.GetStarredMessages
 
   def join("room:" <> name, _, socket) do
     case Schema.Room.get_by(name: name) do
@@ -28,6 +31,7 @@ defmodule ChatWebsocket.RoomChannel do
 
     push socket, "presence_state", TrackRoomUsers.list(socket)
     push socket, "message_state", Room.get_messages(socket)
+    push socket, "starred_messages_state", GetStarredMessages.call(socket.assigns.user)
 
     {:noreply, socket}
   end
@@ -70,5 +74,13 @@ defmodule ChatWebsocket.RoomChannel do
     end
 
     {:noreply, socket}
+  end
+
+  def handle_in("starred_message:create", params, socket) do
+    %{user: user, message: message} = socket.assigns
+
+    with {:ok, record} <- CreateStarredMessage.call(message, user) do
+          push socket, "starred_message:created", record
+    end
   end
 end
