@@ -26,25 +26,31 @@ defmodule ChatServer.Schema.StarredMessage do
     Repo.get(StarredMessage, id)
   end
 
-  def get(message_id) do
-    Repo.get(StarredMessage, message_id: message_id)
+  def get_by_user(user) do
+    Map.get(user, :id)
+    |> starred_messages_query
   end
 
-  def get_starred_messages(user) do
-    user.id
-    |> %{starred_messages: starred_messages_query}
+  def find_by_message_and_user(user, message) do
+    user_id = Map.get(user, :id)
+    message_id = Map.get(message, :id)
+    starred_message_query(user_id, message_id)
+  end
+
+  defp starred_message_query(user_id, message_id) do
+    Repo.get(StarredMessage, user_id: user_id, message_id: message_id)
   end
 
   defp starred_messages_query(user_id) do
     StarredMessage
-    |> where(user_id: user_id)
+    |> where(user_id: ^user_id)
     |> order_by(desc: :inserted_at)
   end
 
   #Mutations
 
   def create(params) do
-    %StarredMessage{}
+    %__MODULE__{}
     |> changeset(params)
     |> Repo.insert
   end
