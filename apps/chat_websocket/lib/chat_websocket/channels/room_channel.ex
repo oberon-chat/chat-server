@@ -6,13 +6,12 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.CreateMessage
   alias ChatServer.CreateSubscription
   alias ChatServer.DeleteMessage
-  alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
   alias ChatServer.UpdateMessage
 
-  def join("room:" <> name, _, socket) do
-    case Schema.Room.get_by(name: name) do
-      nil -> {:error, "Room #{name} does not exist"}
+  def join("room:" <> slug, _, socket) do
+    case Schema.Room.get_by(slug: slug) do
+      nil -> {:error, "Room #{slug} does not exist"}
       room -> join_room(socket, room)
     end
   end
@@ -48,7 +47,6 @@ defmodule ChatWebsocket.RoomChannel do
 
     with {:ok, record} <- CreateMessage.call(params, room, user),
          {:ok, _} <- Room.create_message(socket, record) do
-      TrackRooms.update(room, %{last_message: record})
       broadcast! socket, "message:created", record
     end
 

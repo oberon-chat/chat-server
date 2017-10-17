@@ -1,14 +1,16 @@
 defmodule ChatServer.Schema.Room do
   use ChatServer.Schema
 
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
+
+  alias ChatServer.Schema.Room
 
   @derive {
     Poison.Encoder,
     except: [:__meta__, :inserted_at, :updated_at]
   }
 
-  @default_type "persistent"
+  @default_type "public"
   @default_status "active"
   @default_messages_limit 50
 
@@ -34,8 +36,9 @@ defmodule ChatServer.Schema.Room do
     |> update_change(:type, &downcase/1)
     |> validate_required(:name)
     |> validate_inclusion(:status, ["active", "archived"])
-    |> validate_inclusion(:type, ["persistent", "transient"])
+    |> validate_inclusion(:type, ["public", "private", "direct", "support"])
     |> unique_constraint(:name, name: :rooms_name_status_index)
+    |> unique_constraint(:slug, slug: :rooms_slug_status_index)
     |> create_slug
   end
 
@@ -53,12 +56,17 @@ defmodule ChatServer.Schema.Room do
 
   # Queries
 
-  def all, do: Repo.all(__MODULE__)
+  def all, do: Repo.all(Room)
 
-  def get(id), do: Repo.get(__MODULE__, id)
+  def active do
+    Room
+    |> where(status: "active")
+    |> Repo.all
+  end
 
-  def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
-  def get_by(params), do: Repo.get_by(__MODULE__, params)
+  def get(id), do: Repo.get(Room, id)
+
+  def get_by(params), do: Repo.get_by(Room, params)
 
   def get_or_create_by(params) do
     case get_by(params) do
@@ -69,11 +77,11 @@ defmodule ChatServer.Schema.Room do
 
   def get_messages(id, opts \\ [])
   def get_messages(id, opts) when is_bitstring(id) do
-    __MODULE__
+    Room
     |> Repo.get(id)
     |> get_messages(opts)
   end
-  def get_messages(%__MODULE__{} = room, opts) do
+  def get_messages(%Room{} = room, opts) do
     room
     |> Repo.preload([messages: messages_query(opts)])
     |> Map.get(:messages)
@@ -93,10 +101,17 @@ defmodule ChatServer.Schema.Room do
     limit: ^Keyword.get(opts, :limit, @default_messages_limit)
   end
 
+  def by_type(type) when is_bitstring(type), do: by_type([type])
+  def by_type(types) when is_list(types) do
+    Room
+    |> where([r], r.type in ^types)
+    |> Repo.all
+  end
+
   # Mutations
 
   def create(params) do
-    %__MODULE__{}
+    %Room{}
     |> changeset(params)
     |> Repo.insert
   end

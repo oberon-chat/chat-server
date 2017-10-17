@@ -23,7 +23,7 @@ defmodule ChatServer.Schema.RoomTest do
       changeset = Room.changeset(%Room{}, params)
 
       assert changeset.data.status == "active"
-      assert changeset.data.type == "persistent"
+      assert changeset.data.type == "public"
     end
   end
 
@@ -53,7 +53,7 @@ defmodule ChatServer.Schema.RoomTest do
       params = %{name: "Hello World"}
       changeset = Room.changeset(%Room{}, params)
 
-      assert changeset.changes.slug == "helloworld"
+      assert changeset.changes.slug == "hello-world"
     end
 
     test "slug is not changed on update" do

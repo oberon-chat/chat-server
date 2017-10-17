@@ -4,8 +4,7 @@ defmodule ChatWebsocket.RoomsChannel do
   alias ChatServer.CreateRoom
   alias ChatServer.CreateSubscription
   alias ChatServer.ListSubscriptions
-  alias ChatServer.StartRoom
-  alias ChatServer.TrackRooms
+  alias ChatServer.Room
 
   def join("rooms", _, socket) do
     send self(), :after_join
@@ -19,33 +18,28 @@ defmodule ChatWebsocket.RoomsChannel do
     %{user: user} = socket.assigns
     subscriptions = ListSubscriptions.call(user)
 
-    push socket, "rooms:state", TrackRooms.list
     push socket, "room:subscriptions", %{subscriptions: subscriptions}
 
     {:noreply, socket}
   end
 
-  def handle_in("rooms:create", %{"name" => name}, socket) do
+  def handle_in("rooms:create", params, socket) do
     %{user: user} = socket.assigns
 
-    with {:ok, record} <- CreateRoom.call(%{name: name}),
+    with {:ok, record} <- CreateRoom.call(params, user),
          {:ok, subscription} <- CreateSubscription.call(user, record),
-         {:ok, pid} <- StartRoom.call(record) do
+         {:ok, _} <- Room.start(record) do
       push socket, "room:subscribed", subscription
+      reply(:ok, %{room: record}, socket)
+    else
+      _ -> reply(:error, "Error creating socket", socket)
     end
-
-    {:noreply, socket}
   end
+
+  defp reply(type, value, socket), do: {:reply, {type, value}, socket}
 
   # Filters
 
-  intercept ["presence_diff"]
-
-  def handle_out("presence_diff", msg, socket) do
-    push socket, "rooms:diff", msg
-
-    {:noreply, socket}
-  end
   def handle_out(event, msg, socket) do
     push socket, event, msg
 

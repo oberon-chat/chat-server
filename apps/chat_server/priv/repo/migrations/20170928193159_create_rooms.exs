@@ -15,5 +15,6 @@ defmodule ChatServer.Repo.Migrations.CreateRooms do
     create index(:rooms, [:status])
     create index(:rooms, [:type])
     create unique_index(:rooms, [:name, :status], name: :rooms_name_status_index)
+    create unique_index(:rooms, [:slug, :status], name: :rooms_slug_status_index)
   end
 end
