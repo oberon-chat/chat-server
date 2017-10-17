@@ -19,7 +19,6 @@ defmodule ChatWebsocket.RoomsChannel do
     %{user: user} = socket.assigns
     subscriptions = ListSubscriptions.call(user)
 
-    push socket, "rooms:state", TrackRooms.list
     push socket, "room:subscriptions", %{subscriptions: subscriptions}
 
     {:noreply, socket}
@@ -42,13 +41,6 @@ defmodule ChatWebsocket.RoomsChannel do
 
   # Filters
 
-  intercept ["presence_diff"]
-
-  def handle_out("presence_diff", msg, socket) do
-    push socket, "rooms:diff", msg
-
-    {:noreply, socket}
-  end
   def handle_out(event, msg, socket) do
     push socket, event, msg
 

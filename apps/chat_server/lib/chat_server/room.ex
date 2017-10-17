@@ -6,6 +6,7 @@ defmodule ChatServer.Room do
   alias ChatServer.RoomSupervisor
   alias ChatServer.Schema
   alias ChatServer.TrackRooms
+  alias ChatServer.TrackSupportRooms
 
   defmodule State do
     defstruct [:room, :last_message, messages: []]
@@ -74,6 +75,8 @@ defmodule ChatServer.Room do
 
     {:ok, _} = TrackRooms.track(self(), room)
     messages = Schema.Room.get_messages(room)
+
+    TrackSupportRooms.track(self(), room)
 
     {:ok, %State{room: room, last_message: get_last(messages), messages: messages}}
   end
