@@ -24,10 +24,10 @@ defmodule ChatWebsocket.RoomsChannel do
     {:noreply, socket}
   end
 
-  def handle_in("rooms:create", %{"name" => name}, socket) do
+  def handle_in("rooms:create", params, socket) do
     %{user: user} = socket.assigns
 
-    with {:ok, record} <- CreateRoom.call(%{name: name}),
+    with {:ok, record} <- CreateRoom.call(params, user),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
       push socket, "room:subscribed", subscription

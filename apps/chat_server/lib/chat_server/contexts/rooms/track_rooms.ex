@@ -23,7 +23,7 @@ defmodule ChatServer.TrackRooms do
         Presence.track(pid, @presence_key, key(room), %{
           id: room.id,
           slug: room.slug,
-          pid: Util.Pid.serialize(pid)
+          pid: pid
         })
       _existing_pid ->
         Logger.warn "Room already exists #{room.slug}" <> inspect(pid)
@@ -45,10 +45,10 @@ defmodule ChatServer.TrackRooms do
   defp get_room_pid(key) do
     case Presence.list(@presence_key)[key] do
       %{metas: [%{pid: pid}]} ->
-        Util.Pid.deserialize(pid)
+        pid
       %{metas: metas} ->
         Logger.warn "Multiple rooms created " <> inspect(metas)
-        Util.Pid.deserialize(hd(metas) |> Map.get(:pid))
+        Map.get(hd(metas), :pid)
       _ ->
         nil
     end

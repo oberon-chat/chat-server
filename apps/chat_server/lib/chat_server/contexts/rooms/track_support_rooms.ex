@@ -19,13 +19,13 @@ defmodule ChatServer.TrackSupportRooms do
   # Mutations
 
   def track(pid, %{type: "support"} = room) do
-    case TrackRooms.get_pid(room) do
+    case Map.get(list(), key(room)) do
       nil ->
         Presence.track(pid, @presence_key, key(room), %{
           slug: room.slug
         })
-      _existing_pid ->
-        Logger.warn "Support room already exists #{room.slug}" <> inspect(pid)
+      _data ->
+        Logger.warn "Support room already tracked #{room.slug}" <> inspect(pid)
         :error
     end
   end
