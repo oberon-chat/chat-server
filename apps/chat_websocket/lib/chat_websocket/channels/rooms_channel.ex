@@ -5,7 +5,6 @@ defmodule ChatWebsocket.RoomsChannel do
   alias ChatServer.CreateSubscription
   alias ChatServer.ListSubscriptions
   alias ChatServer.Room
-  alias ChatServer.TrackRooms
 
   def join("rooms", _, socket) do
     send self(), :after_join
