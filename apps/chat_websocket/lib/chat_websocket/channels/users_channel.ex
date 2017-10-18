@@ -1,6 +1,8 @@
 defmodule ChatWebsocket.UsersChannel do
   use Phoenix.Channel
 
+  alias ChatServer.TrackUsers
+
   def join("users", _, socket) do
     send self(), :after_join
 
@@ -10,13 +12,23 @@ defmodule ChatWebsocket.UsersChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    push socket, "users:current", socket.assigns.user
+    TrackUsers.track(self(), socket.assigns.user)
+
+    push socket, "users:connected:state", TrackUsers.list
+    push socket, "users:connected:current", socket.assigns.user
 
     {:noreply, socket}
   end
 
   # Filters
 
+  intercept ["presence_diff"]
+
+  def handle_out("presence_diff", msg, socket) do
+    push socket, "users:connected:diff", msg
+
+    {:noreply, socket}
+  end
   def handle_out(event, msg, socket) do
     push socket, event, msg
 
