@@ -19,6 +19,10 @@ defmodule ChatServer.CreateSubscriptionTest do
       {:ok, room: room, user: user}
     end
 
+    test "returns the record", %{room: room, user: user} do
+      {:ok, %Schema.Subscription{}} = CreateSubscription.call(user, room)
+    end
+
     test "with two schema records", %{room: room, user: user} do
       assert room.users == []
       assert user.rooms == []

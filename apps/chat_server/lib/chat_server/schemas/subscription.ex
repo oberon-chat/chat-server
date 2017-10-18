@@ -26,11 +26,17 @@ defmodule ChatServer.Schema.Subscription do
 
   def get(id), do: Repo.get(Subscription, id)
 
+  def get_by(params), do: Repo.get_by(Subscription, params)
+
   # Mutations
 
   def create(params) do
     %Subscription{}
     |> changeset(params)
     |> Repo.insert
+  end
+
+  def delete(%Subscription{} = subscription) do
+    Repo.delete(subscription)
   end
 end
