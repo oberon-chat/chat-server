@@ -31,7 +31,7 @@ defmodule ChatWebsocket.RoomChannel do
 
     push socket, "presence_state", TrackRoomUsers.list(socket)
     push socket, "message_state", Room.get_messages(socket)
-    push socket, "starred_messages_state", GetStarredMessages.call(socket.assigns.user)
+    # push socket, "starred_messages_state", Room.get_starred_messages(socket)
 
     {:noreply, socket}
   end
