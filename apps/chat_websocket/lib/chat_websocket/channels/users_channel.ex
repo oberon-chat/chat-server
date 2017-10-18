@@ -14,8 +14,8 @@ defmodule ChatWebsocket.UsersChannel do
   def handle_info(:after_join, socket) do
     TrackUsers.track(self(), socket.assigns.user)
 
-    push socket, "users:state", TrackUsers.list
-    push socket, "users:current", socket.assigns.user
+    push socket, "users:connected:state", TrackUsers.list
+    push socket, "users:connected:current", socket.assigns.user
 
     {:noreply, socket}
   end
@@ -25,7 +25,7 @@ defmodule ChatWebsocket.UsersChannel do
   intercept ["presence_diff"]
 
   def handle_out("presence_diff", msg, socket) do
-    push socket, "users:diff", msg
+    push socket, "users:connected:diff", msg
 
     {:noreply, socket}
   end
