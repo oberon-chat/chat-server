@@ -6,6 +6,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.CreateMessage
   alias ChatServer.CreateSubscription
   alias ChatServer.DeleteMessage
+  alias ChatServer.DeleteSubscription
   alias ChatServer.TrackRoomUsers
   alias ChatServer.UpdateMessage
 
@@ -37,6 +38,16 @@ defmodule ChatWebsocket.RoomChannel do
 
     with {:ok, subscription} <- CreateSubscription.call(user, room) do
       push socket, "room:subscribed", subscription
+    end
+
+    {:noreply, socket}
+  end
+
+  def handle_in("room:unsubscribe", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, subscription} <- DeleteSubscription.call(user, room) do
+      push socket, "room:unsubscribed", subscription
     end
 
     {:noreply, socket}

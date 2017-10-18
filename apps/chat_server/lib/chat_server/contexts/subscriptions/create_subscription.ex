@@ -16,11 +16,11 @@ defmodule ChatServer.CreateSubscription do
   def call(%Schema.User{} = user, %Schema.Room{} = room) do
     params = %{room: room, user: user}
 
-    case Schema.Subscription.create(params) do
-      {:ok, subscription} ->
-        {:ok, Repo.preload(subscription, [:room])}
-      _ ->
-        {:eror, "Error creating subscription"}
+    with {:ok, subscription} <- Schema.Subscription.create(params),
+         subscription <- Repo.preload(subscription, [:room]) do
+      {:ok, subscription}
+    else
+      _ -> {:eror, "Error creating subscription"}
     end
   end
 end
