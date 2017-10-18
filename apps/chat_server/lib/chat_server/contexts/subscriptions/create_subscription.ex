@@ -17,7 +17,7 @@ defmodule ChatServer.CreateSubscription do
     params = %{room: room, user: user}
 
     with {:ok, subscription} <- Schema.Subscription.create(params),
-         subscription <- Repo.preload(subscription, [:room]) do
+         subscription <- Repo.preload(subscription, [:room, :user]) do
       {:ok, subscription}
     else
       _ -> {:eror, "Error creating subscription"}

@@ -15,10 +15,9 @@ defmodule ChatWebsocket.RoomsChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    %{user: user} = socket.assigns
-    subscriptions = ListSubscriptions.call(user)
-
-    push socket, "room:subscriptions", %{subscriptions: subscriptions}
+    push socket, "user:subscriptions", %{
+      subscriptions: ListSubscriptions.call(socket.assigns.user)
+    }
 
     {:noreply, socket}
   end
@@ -29,7 +28,7 @@ defmodule ChatWebsocket.RoomsChannel do
     with {:ok, record} <- CreateRoom.call(params, user),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
-      push socket, "room:subscribed", subscription
+      push socket, "user:subscription:created", subscription
       reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error creating socket", socket)

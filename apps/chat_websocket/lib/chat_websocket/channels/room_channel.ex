@@ -7,7 +7,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.CreateSubscription
   alias ChatServer.DeleteMessage
   alias ChatServer.DeleteSubscription
-  alias ChatServer.TrackRoomUsers
+  alias ChatServer.ListSubscriptions
   alias ChatServer.UpdateMessage
 
   def join("room:" <> slug, _, socket) do
@@ -25,29 +25,30 @@ defmodule ChatWebsocket.RoomChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    TrackRoomUsers.track(socket, socket.assigns.user)
-
-    push socket, "users:state", TrackRoomUsers.list(socket)
     push socket, "messages:list", Room.get_messages(socket)
+    push socket, "room:subscriptions", %{
+      subscriptions: ListSubscriptions.call(socket.assigns.room)
+    }
 
     {:noreply, socket}
   end
 
-  def handle_in("room:subscribe", _params, socket) do
+  def handle_in("room:subscription:create", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, subscription} <- CreateSubscription.call(user, room) do
-      push socket, "room:subscribed", subscription
+      broadcast! "rooms", "user:subscription:created", subscription
+      broadcast! socket, "room:subscription:created", subscription
     end
 
     {:noreply, socket}
   end
 
-  def handle_in("room:unsubscribe", _params, socket) do
+  def handle_in("room:subscription:delete", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, subscription} <- DeleteSubscription.call(user, room) do
-      push socket, "room:unsubscribed", subscription
+      broadcast! socket, "room:subscription:deleted", subscription
     end
 
     {:noreply, socket}
@@ -88,13 +89,6 @@ defmodule ChatWebsocket.RoomChannel do
 
   # Filters
 
-  intercept ["presence_diff"]
-
-  def handle_out("presence_diff", msg, socket) do
-    push socket, "users:diff", msg
-
-    {:noreply, socket}
-  end
   def handle_out(event, msg, socket) do
     push socket, event, msg
 
