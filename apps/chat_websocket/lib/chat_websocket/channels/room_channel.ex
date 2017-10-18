@@ -37,7 +37,7 @@ defmodule ChatWebsocket.RoomChannel do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, subscription} <- CreateSubscription.call(user, room) do
-      broadcast! "rooms", "user:subscription:created", subscription
+      push socket, "user:subscription:created", subscription
       broadcast! socket, "room:subscription:created", subscription
     end
 
