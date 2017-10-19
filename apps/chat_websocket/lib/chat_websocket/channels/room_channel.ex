@@ -10,7 +10,6 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.UpdateMessage
   alias ChatServer.CreateStarredMessage
   alias ChatServer.DeleteStarredMessage
-  alias ChatServer.GetStarredMessages
 
   def join("room:" <> name, _, socket) do
     case Schema.Room.get_by(name: name) do
@@ -31,8 +30,6 @@ defmodule ChatWebsocket.RoomChannel do
 
     push socket, "presence_state", TrackRoomUsers.list(socket)
     push socket, "message_state", Room.get_messages(socket)
-    # push socket, "starred_messages_state", Room.get_starred_messages(socket)
-
     {:noreply, socket}
   end
 

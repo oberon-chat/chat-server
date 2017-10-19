@@ -4,6 +4,7 @@ defmodule ChatWebsocket.RoomsChannel do
   alias ChatServer.CreateRoom
   alias ChatServer.StartRoom
   alias ChatServer.TrackRooms
+  alias ChatServer.GetStarredMessages
 
   def join("rooms", _, socket) do
     send self(), :after_join
@@ -13,6 +14,7 @@ defmodule ChatWebsocket.RoomsChannel do
 
   def handle_info(:after_join, socket) do
     push socket, "presence_state", TrackRooms.list
+    push socket, "starred_messages_state", GetStarredMessages.call(socket.assigns.user)
 
     {:noreply, socket}
   end
