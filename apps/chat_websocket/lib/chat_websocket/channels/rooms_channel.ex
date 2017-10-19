@@ -28,9 +28,7 @@ defmodule ChatWebsocket.RoomsChannel do
     with {:ok, record} <- CreateRoom.call(params, user),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
-      public_rooms = ListPublicRooms.call(socket.assigns.user)
-
-      broadcast socket, "rooms:public", %{rooms: public_rooms}
+      broadcast socket, "rooms:public:created", record
       push socket, "user:subscription:created", subscription
 
       reply(:ok, %{room: record}, socket)
