@@ -3,7 +3,7 @@ defmodule ChatWebsocket.RoomsChannel do
 
   alias ChatServer.CreateRoom
   alias ChatServer.CreateSubscription
-  alias ChatServer.ListSubscriptions
+  alias ChatServer.ListPublicRooms
   alias ChatServer.Room
 
   def join("rooms", _, socket) do
@@ -15,8 +15,8 @@ defmodule ChatWebsocket.RoomsChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    push socket, "user:subscriptions", %{
-      subscriptions: ListSubscriptions.call(socket.assigns.user)
+    push socket, "rooms:public", %{
+      rooms: ListPublicRooms.call(socket.assigns.user)
     }
 
     {:noreply, socket}
@@ -33,6 +33,11 @@ defmodule ChatWebsocket.RoomsChannel do
     else
       _ -> reply(:error, "Error creating socket", socket)
     end
+  end
+
+  def handle_in("rooms:public", _params, socket) do
+    rooms = ListPublicRooms.call(socket.assigns.user)
+    reply(:ok, %{rooms: rooms}, socket)
   end
 
   defp reply(type, value, socket), do: {:reply, {type, value}, socket}

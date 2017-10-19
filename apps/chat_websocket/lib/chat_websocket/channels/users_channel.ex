@@ -1,6 +1,7 @@
 defmodule ChatWebsocket.UsersChannel do
   use Phoenix.Channel
 
+  alias ChatServer.ListSubscriptions
   alias ChatServer.TrackUsers
 
   def join("users", _, socket) do
@@ -15,7 +16,10 @@ defmodule ChatWebsocket.UsersChannel do
     TrackUsers.track(self(), socket.assigns.user)
 
     push socket, "users:connected:state", TrackUsers.list
-    push socket, "users:connected:current", socket.assigns.user
+    push socket, "user:current", socket.assigns.user
+    push socket, "user:current:subscriptions", %{
+      subscriptions: ListSubscriptions.call(socket.assigns.user)
+    }
 
     {:noreply, socket}
   end
