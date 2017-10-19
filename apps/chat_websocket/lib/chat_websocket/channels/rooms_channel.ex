@@ -15,9 +15,9 @@ defmodule ChatWebsocket.RoomsChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    push socket, "rooms:public", %{
-      rooms: ListPublicRooms.call(socket.assigns.user)
-    }
+    public_rooms = ListPublicRooms.call(socket.assigns.user)
+
+    push socket, "rooms:public", %{rooms: public_rooms}
 
     {:noreply, socket}
   end
@@ -28,16 +28,15 @@ defmodule ChatWebsocket.RoomsChannel do
     with {:ok, record} <- CreateRoom.call(params, user),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
+      public_rooms = ListPublicRooms.call(socket.assigns.user)
+
+      broadcast socket, "rooms:public", %{rooms: public_rooms}
       push socket, "user:subscription:created", subscription
+
       reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error creating socket", socket)
     end
-  end
-
-  def handle_in("rooms:public", _params, socket) do
-    rooms = ListPublicRooms.call(socket.assigns.user)
-    reply(:ok, %{rooms: rooms}, socket)
   end
 
   defp reply(type, value, socket), do: {:reply, {type, value}, socket}
