@@ -15,9 +15,9 @@ defmodule ChatWebsocket.RoomsChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    public_rooms = ListPublicRooms.call(socket.assigns.user)
+    %{user: user} = socket.assigns
 
-    push socket, "rooms:public", %{rooms: public_rooms}
+    push socket, "rooms:public", %{rooms: ListPublicRooms.call(user)}
 
     {:noreply, socket}
   end
