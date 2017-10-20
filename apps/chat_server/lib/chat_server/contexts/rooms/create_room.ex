@@ -3,12 +3,6 @@ defmodule ChatServer.CreateRoom do
 
   alias ChatServer.Schema
 
-  defmodule State do
-    @derive {Poison.Encoder, only: [room: [:id, :slug, :name]]}
-
-    defstruct [:room]
-  end
-
   def call(params \\ %{}, _user) do
     Logger.info "Creating room " <> inspect(params)
 

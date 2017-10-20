@@ -2,7 +2,9 @@ defmodule ChatWebsocket.RoomsChannel do
   use Phoenix.Channel
 
   alias ChatServer.CreateRoom
+  alias ChatServer.CreateDirectRoom
   alias ChatServer.CreateSubscription
+  alias ChatServer.GetUser
   alias ChatServer.ListPublicRooms
   alias ChatServer.Room
 
@@ -22,24 +24,36 @@ defmodule ChatWebsocket.RoomsChannel do
     {:noreply, socket}
   end
 
+  def handle_in("rooms:create", %{"type" => "direct"} = params, socket) do
+    with {:ok, record} <- CreateDirectRoom.call(socket.assigns.user, params),
+         {:ok, _} <- Room.start(record) do
+      # TODO: publish subscription to other user
+      push socket, "user:subscription:created", subscription
+
+      reply(:ok, %{room: record}, socket)
+    else
+      _ -> reply(:error, "Error creating room", socket)
+    end
+  end
   def handle_in("rooms:create", params, socket) do
     %{user: user} = socket.assigns
 
-    with {:ok, record} <- CreateRoom.call(params, user),
-         :ok <- broadcast_room_creation(socket, record),
+    with {:ok, record} <- CreateRoom.call(user, params),
+         :ok <- maybe_broadcast_room_creation(socket, record),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
       push socket, "user:subscription:created", subscription
 
       reply(:ok, %{room: record}, socket)
     else
-      _ -> reply(:error, "Error creating socket", socket)
+      _ -> reply(:error, "Error creating room", socket)
     end
   end
 
+  defp reply(type, value, socket) when is_bitstring(value), do: reply(type, %{response: value}, socket)
   defp reply(type, value, socket), do: {:reply, {type, value}, socket}
 
-  defp broadcast_room_creation(socket, record) do
+  defp maybe_broadcast_room_creation(socket, record) do
     case record.type do
       "public" -> broadcast socket, "rooms:public:created", record
       _ -> :ok
