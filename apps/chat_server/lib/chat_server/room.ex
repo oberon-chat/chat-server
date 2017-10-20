@@ -47,14 +47,6 @@ defmodule ChatServer.Room do
     GenServer.call(pid, :get_messages)
   end
 
-  def get_starred_messages(%Phoenix.Socket{} = socket) do
-    GenServer.call(get_pid(socket), :get_starred_messages)
-  end
-
-  def get_starred_messages(pid) do
-    GenServer.call(pid, :get_starred_messages)
-  end
-
   def create_message(%Phoenix.Socket{} = socket, msg) do
     GenServer.call(get_pid(socket), {:create_message, msg})
   end
@@ -90,10 +82,6 @@ defmodule ChatServer.Room do
 
   def handle_call(:get_messages, _from, %{messages: messages} = state) do
     {:reply, %{messages: messages}, state}
-  end
-
-  def handle_call(:get_starred_messages, _from, %{starred_messages: starred_messages} = state) do
-    {:reply, %{starred_messages: starred_messages}, state}
   end
 
   def handle_call({:create_message, message}, _from, %{messages: messages} = state) do
