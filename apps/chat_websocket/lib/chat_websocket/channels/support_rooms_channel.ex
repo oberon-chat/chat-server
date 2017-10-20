@@ -12,7 +12,7 @@ defmodule ChatWebsocket.SupportRoomsChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    push socket, "support_rooms:state", TrackSupportRooms.list
+    push socket, "rooms:support:state", TrackSupportRooms.list
 
     {:noreply, socket}
   end
@@ -22,7 +22,7 @@ defmodule ChatWebsocket.SupportRoomsChannel do
   intercept ["presence_diff"]
 
   def handle_out("presence_diff", msg, socket) do
-    push socket, "support_rooms:diff", msg
+    push socket, "rooms:support:diff", msg
 
     {:noreply, socket}
   end

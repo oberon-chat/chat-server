@@ -3,7 +3,7 @@ defmodule ChatWebsocket.RoomsChannel do
 
   alias ChatServer.CreateRoom
   alias ChatServer.CreateSubscription
-  alias ChatServer.ListSubscriptions
+  alias ChatServer.ListPublicRooms
   alias ChatServer.Room
 
   def join("rooms", _, socket) do
@@ -15,9 +15,9 @@ defmodule ChatWebsocket.RoomsChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    push socket, "user:subscriptions", %{
-      subscriptions: ListSubscriptions.call(socket.assigns.user)
-    }
+    public_rooms = ListPublicRooms.call(socket.assigns.user)
+
+    push socket, "rooms:public", %{rooms: public_rooms}
 
     {:noreply, socket}
   end
@@ -26,9 +26,11 @@ defmodule ChatWebsocket.RoomsChannel do
     %{user: user} = socket.assigns
 
     with {:ok, record} <- CreateRoom.call(params, user),
+         :ok <- broadcast_room_creation(socket, record),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
       push socket, "user:subscription:created", subscription
+
       reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error creating socket", socket)
@@ -36,6 +38,13 @@ defmodule ChatWebsocket.RoomsChannel do
   end
 
   defp reply(type, value, socket), do: {:reply, {type, value}, socket}
+
+  defp broadcast_room_creation(socket, record) do
+    case record.type do
+      "public" -> broadcast socket, "rooms:public:created", record
+      _ -> :ok
+    end
+  end
 
   # Filters
 

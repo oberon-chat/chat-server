@@ -25,7 +25,7 @@ defmodule ChatWebsocket.RoomChannel do
   # Callbacks
 
   def handle_info(:after_join, socket) do
-    push socket, "messages:list", Room.get_messages(socket)
+    push socket, "messages", Room.get_messages(socket)
     push socket, "room:subscriptions", %{
       subscriptions: ListSubscriptions.call(socket.assigns.room)
     }
