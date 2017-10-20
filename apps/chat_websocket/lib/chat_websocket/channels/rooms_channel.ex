@@ -26,9 +26,9 @@ defmodule ChatWebsocket.RoomsChannel do
     %{user: user} = socket.assigns
 
     with {:ok, record} <- CreateRoom.call(params, user),
+         :ok <- broadcast_room_creation(socket, record),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          {:ok, _} <- Room.start(record) do
-      broadcast socket, "rooms:public:created", record
       push socket, "user:subscription:created", subscription
 
       reply(:ok, %{room: record}, socket)
@@ -38,6 +38,13 @@ defmodule ChatWebsocket.RoomsChannel do
   end
 
   defp reply(type, value, socket), do: {:reply, {type, value}, socket}
+
+  defp broadcast_room_creation(socket, record) do
+    case record.type do
+      "public" -> broadcast socket, "rooms:public:created", record
+      _ -> :ok
+    end
+  end
 
   # Filters
 
