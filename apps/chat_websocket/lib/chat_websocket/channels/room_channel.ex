@@ -72,12 +72,4 @@ defmodule ChatWebsocket.RoomChannel do
 
     {:noreply, socket}
   end
-
-  def handle_in("starred_message:create", params, socket) do
-    %{user: user, message: message} = socket.assigns
-
-    with {:ok, record} <- CreateStarredMessage.call(message, user) do
-          push socket, "starred_message:created", record
-    end
-  end
 end

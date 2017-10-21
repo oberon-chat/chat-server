@@ -3,9 +3,9 @@ defmodule ChatServer.CreateStarredMessage do
 
   alias ChatServer.Schema
 
-  def call(message, user) do
-
-    with {:ok, record} <- create_record(message, user) do
+  def call(message_id, user) do
+    message = Schema.Message.get(message_id)
+    with {:ok, record} <- Schema.StarredMessage.create(%{user: user, message: message}) do
         {:ok, Schema.StarredMessage.preload(record, [:message, :user])}
     else
       error ->
@@ -14,7 +14,4 @@ defmodule ChatServer.CreateStarredMessage do
     end
   end
 
-  defp create_record(message, user) do
-    Schema.StarredMessage.create(user_id: user.id, message_id: message.id)
-  end
 end
