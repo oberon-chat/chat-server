@@ -1,47 +1,46 @@
 defmodule ChatServer.CreateDirectRoom do
   require Logger
 
+  import Ecto.Query
+
+  alias ChatServer.CreateSubscription
+  alias ChatServer.GetDirectRoom
+  alias ChatServer.GetUser
+  alias ChatServer.Repo
   alias ChatServer.Schema
 
-  def call(_user, params \\ %{}) do
-    Logger.info "Creating room " <> inspect(params)
-
+  def call(primary_user, params \\ %{}) do
     # TODO verify user is allowed to create direct room
-    # TODO verify direct room does not already exist
 
-    # Schema.Room |> join(:left, [r], s in assoc(r, :subscriptions)) |> where(name: "6fc009db-acc2-4ba3-b4bc-2461fba7e2b4") |> Repo.all
-    # (from r in Schema.Room, left_join: s in assoc(r, :subscriptions), where: s.updated_at == ^~N[2017-10-20 22:23:46.334945]) |> Repo.all
-
-    with {:ok, other_user} <- get_other_user(params),
-         {:ok, record} <- create_record(params) do
-      {:ok, record}
+    with {:ok, secondary_user} <- GetUser.call(Map.get(params, "user_id")),
+         {:error, _} <- GetDirectRoom.call(primary_user, secondary_user),
+         {:ok, record} <- create_record(primary_user, secondary_user),
+         {:ok, subscription} <- create_primary_subscription(primary_user, record),
+         {:ok, _} <- create_secondary_subscription(secondary_user, record) do
+      {:ok, record, subscription}
     else
       _ -> {:error, "Error creating room"}
     end
   end
 
-  defp get_other_user(params) do
-    id = Map.get(params, "user_id")
-
-    case Schema.User.get(id) do
-      nil -> {:error, "User not found"}
-      user -> {:ok, user}
-    end
-  end
-
-  defp create_record(params) do
-    create_params
+  defp create_record(primary_user, secondary_user) do
+    create_params(primary_user, secondary_user)
     |> Schema.Room.create
   end
 
-  defp create_params(params) do
-    uuid = Ecto.UUID.generate
-
+  defp create_params(primary_user, secondary_user) do
     %{
-      id: uuid,
-      name: uuid,
-      slug: uuid,
+      name: "#{primary_user.name} and #{secondary_user.name}",
+      slug: Ecto.UUID.generate,
       type: "direct"
     }
+  end
+
+  def create_primary_subscription(user, room) do
+    CreateSubscription.call(user, room.id, state: "open")
+  end
+
+  def create_secondary_subscription(user, room) do
+    CreateSubscription.call(user, room.id, state: "closed")
   end
 end

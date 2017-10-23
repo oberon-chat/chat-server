@@ -25,8 +25,9 @@ defmodule ChatWebsocket.RoomsChannel do
   end
 
   def handle_in("rooms:create", %{"type" => "direct"} = params, socket) do
-    with {:ok, record} <- CreateDirectRoom.call(socket.assigns.user, params),
+    with {:ok, record, subscription} <- CreateDirectRoom.call(socket.assigns.user, params),
          {:ok, _} <- Room.start(record) do
+      # TODO: Whenever message is created, set both subscriptions to open.
       # TODO: publish subscription to other user
       push socket, "user:subscription:created", subscription
 
@@ -39,9 +40,9 @@ defmodule ChatWebsocket.RoomsChannel do
     %{user: user} = socket.assigns
 
     with {:ok, record} <- CreateRoom.call(user, params),
-         :ok <- maybe_broadcast_room_creation(socket, record),
+         {:ok, _} <- Room.start(record),
          {:ok, subscription} <- CreateSubscription.call(user, record),
-         {:ok, _} <- Room.start(record) do
+         :ok <- maybe_broadcast_room_creation(socket, record) do
       push socket, "user:subscription:created", subscription
 
       reply(:ok, %{room: record}, socket)
@@ -50,15 +51,15 @@ defmodule ChatWebsocket.RoomsChannel do
     end
   end
 
-  defp reply(type, value, socket) when is_bitstring(value), do: reply(type, %{response: value}, socket)
-  defp reply(type, value, socket), do: {:reply, {type, value}, socket}
-
   defp maybe_broadcast_room_creation(socket, record) do
     case record.type do
       "public" -> broadcast socket, "rooms:public:created", record
       _ -> :ok
     end
   end
+
+  defp reply(type, value, socket) when is_bitstring(value), do: reply(type, %{response: value}, socket)
+  defp reply(type, value, socket), do: {:reply, {type, value}, socket}
 
   # Filters
 

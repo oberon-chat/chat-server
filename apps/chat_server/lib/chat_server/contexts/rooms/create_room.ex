@@ -3,7 +3,13 @@ defmodule ChatServer.CreateRoom do
 
   alias ChatServer.Schema
 
-  def call(params \\ %{}, _user) do
+  defmodule State do
+    @derive {Poison.Encoder, only: [room: [:id, :slug, :name]]}
+
+    defstruct [:room]
+  end
+
+  def call(_user, params \\ %{}) do
     Logger.info "Creating room " <> inspect(params)
 
     # TODO verify user is allowed to create room of that type
@@ -19,8 +25,7 @@ defmodule ChatServer.CreateRoom do
   defp create_record(params) do
     params
     |> Map.take(["name", "type"])
-    |> Util.Map.with_atoms
-    |> Schema.Room.get_or_create_by
+    |> Schema.Room.create
   end
 
   defp broadcast_creation(room) do
