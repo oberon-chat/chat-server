@@ -6,7 +6,7 @@ defmodule ChatServer.Schema.Subscription do
     except: [:__meta__, :inserted_at, :updated_at]
   }
 
-  @allowed_states ["open", "muted", "closed"]
+  @allowed_states ["open", "muted", "closed", "ignored"]
   @default_state "open"
 
   schema "subscriptions" do

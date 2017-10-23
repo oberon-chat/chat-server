@@ -58,7 +58,8 @@ defmodule ChatWebsocket.RoomChannel do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, record} <- CreateMessage.call(params, room, user),
-         {:ok, _} <- Room.create_message(socket, record) do
+         {:ok, _} <- Room.create_message(socket, record),
+         :ok <- OpenSubscriptions.call(room) do
       broadcast! socket, "message:created", record
     end
 

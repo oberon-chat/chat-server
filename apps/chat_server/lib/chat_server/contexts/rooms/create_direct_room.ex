@@ -1,6 +1,4 @@
 defmodule ChatServer.CreateDirectRoom do
-  require Logger
-
   import Ecto.Query
 
   alias ChatServer.CreateSubscription
