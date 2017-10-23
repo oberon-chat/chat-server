@@ -49,6 +49,7 @@ defmodule ChatServer.Schema.Room do
 
   def create_slug(set) do
     with nil <- Map.get(set.data, :slug, nil),
+         nil <- Map.get(set.changes, :slug, nil),
          name <- Map.get(set.changes, :name, nil) do
       put_change(set, :slug, Util.String.slugify(name))
     else
