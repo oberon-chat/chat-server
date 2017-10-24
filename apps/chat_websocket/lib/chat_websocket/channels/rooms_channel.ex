@@ -28,8 +28,8 @@ defmodule ChatWebsocket.RoomsChannel do
   def handle_in("rooms:create", %{"type" => "direct"} = params, socket) do
     with {:ok, result} <- CreateDirectRoom.call(socket.assigns.user, params),
          {:ok, _} <- Room.start(result.record),
-         :ok <- broadcast_user_subscription!(result.primary_user, result.primary_subscription),
-         :ok <- broadcast_user_subscription!(result.secondary_user, result.secondary_subscription) do
+         :ok <- broadcast_user_event!(result.primary_user, "user:current:subscription:created", result.primary_subscription),
+         :ok <- broadcast_user_event!(result.secondary_user, "user:current:subscription:created", result.secondary_subscription) do
       reply(:ok, %{room: result.record}, socket)
     else
       _ -> reply(:error, "Error creating room", socket)
@@ -42,15 +42,12 @@ defmodule ChatWebsocket.RoomsChannel do
          {:ok, _} <- Room.start(record),
          {:ok, subscription} <- CreateSubscription.call(user, record),
          :ok <- maybe_broadcast_room_creation!(socket, record),
-         :ok <- broadcast_user_subscription!(user, subscription) do
+         :ok <- broadcast_user_event!(user, "user:current:subscription:created", subscription) do
       reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error creating room", socket)
     end
   end
-
-  defp broadcast_user_subscription!(user, subscription),
-    do: ChatPubSub.broadcast! user_topic(user), "user:current:subscription:created", subscription
 
   defp maybe_broadcast_room_creation!(socket, record) do
     case record.type do
@@ -58,9 +55,6 @@ defmodule ChatWebsocket.RoomsChannel do
       _ -> :ok
     end
   end
-
-  defp reply(type, value, socket) when is_bitstring(value), do: reply(type, %{response: value}, socket)
-  defp reply(type, value, socket), do: {:reply, {type, value}, socket}
 
   # Filters
 

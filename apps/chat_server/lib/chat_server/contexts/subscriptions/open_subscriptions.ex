@@ -16,7 +16,7 @@ defmodule OpenSubscriptions do
   def call(%Schema.Room{type: "direct"} = room) do
     {:ok, open_subscriptions(room)}
   end
-  def call(_), do: []
+  def call(_), do: {:ok, []}
 
   def open_subscriptions(room) do
     Repo.preload(room, [:subscriptions]).subscriptions

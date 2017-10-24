@@ -36,76 +36,83 @@ defmodule ChatWebsocket.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("room:subscription:create", _params, socket) do
-    %{room: room, user: user} = socket.assigns
-
-    with {:ok, subscription} <- CreateSubscription.call(user, room) do
-      ChatPubSub.broadcast! user_topic(socket), "user:current:subscription:created", subscription
-      broadcast! socket, "room:subscription:created", subscription
-    end
-
-    {:noreply, socket}
-  end
-
-  def handle_in("room:subscription:update", params, socket) do
-    %{room: room, user: user} = socket.assigns
-
-    with {:ok, subscription} <- UpdateSubscription.call(user, room, params) do
-      ChatPubSub.broadcast! user_topic(socket), "user:current:subscription:updated", subscription
-      broadcast! socket, "room:subscription:updated", subscription
-    end
-
-    {:noreply, socket}
-  end
-
-  def handle_in("room:subscription:delete", _params, socket) do
-    %{room: room, user: user} = socket.assigns
-
-    with {:ok, subscription} <- DeleteSubscription.call(user, room) do
-      broadcast! socket, "room:subscription:deleted", subscription
-    end
-
-    {:noreply, socket}
-  end
-
   def handle_in("message:create", params, socket) do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, record} <- CreateMessage.call(user, room, params),
          {:ok, _} <- Room.create_message(socket, record),
          {:ok, subscriptions} <- OpenSubscriptions.call(room),
-         :ok <- broadcast_user_subscriptions!(subscriptions) do
-      broadcast! socket, "message:created", record
+         :ok <- broadcast_user_subscriptions!(subscriptions),
+         :ok <- broadcast!(socket, "message:created", record) do
+      reply(:ok, %{message: record}, socket)
+    else
+      _ -> reply(:error, "Error creating message", socket)
     end
-
-    {:noreply, socket}
   end
 
   def handle_in("message:update", params, socket) do
     %{user: user} = socket.assigns
 
     with {:ok, record} <- UpdateMessage.call(user, params),
-         {:ok, message} <- Room.update_message(socket, record) do
-      broadcast! socket, "message:updated", message
+         {:ok, message} <- Room.update_message(socket, record),
+         :ok <- broadcast!(socket, "message:updated", message) do
+      reply(:ok, %{message: record}, socket)
+    else
+      _ -> reply(:error, "Error updating message", socket)
     end
-
-    {:noreply, socket}
   end
 
   def handle_in("message:delete", params, socket) do
     %{user: user} = socket.assigns
 
     with {:ok, _} <- DeleteMessage.call(user, params),
-         {:ok, message} <- Room.delete_message(socket, params) do
-      broadcast! socket, "message:deleted", message
+         {:ok, message} <- Room.delete_message(socket, params),
+         :ok <- broadcast!(socket, "message:deleted", message) do
+      reply(:ok, %{message: message}, socket)
+    else
+      _ -> reply(:error, "Error deleting message", socket)
     end
+  end
 
-    {:noreply, socket}
+  def handle_in("room:subscription:create", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, subscription} <- CreateSubscription.call(user, room),
+         :ok <- broadcast_user_event!(user, "user:current:subscription:created", subscription),
+         :ok <- broadcast!(socket, "room:subscription:created", subscription) do
+      reply(:ok, %{subscription: subscription}, socket)
+    else
+      _ -> reply(:error, "Error creating subscription", socket)
+    end
+  end
+
+  def handle_in("room:subscription:update", params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, subscription} <- UpdateSubscription.call(user, room, params),
+         :ok <- broadcast_user_event!(user, "user:current:subscription:updated", subscription),
+         :ok <- broadcast!(socket, "room:subscription:updated", subscription) do
+      reply(:ok, %{subscription: subscription}, socket)
+    else
+      _ -> reply(:error, "Error updating subscription", socket)
+    end
+  end
+
+  def handle_in("room:subscription:delete", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, subscription} <- DeleteSubscription.call(user, room),
+         :ok <- broadcast_user_event!(user, "user:current:subscription:deleted", subscription),
+         :ok <- broadcast!(socket, "room:subscription:deleted", subscription) do
+      reply(:ok, %{subscription: subscription}, socket)
+    else
+      _ -> reply(:error, "Error deleting subscription", socket)
+    end
   end
 
   defp broadcast_user_subscriptions!(subscriptions) do
     Enum.map(subscriptions, fn (subscription) ->
-      ChatPubSub.broadcast! user_topic(subscription.user), "user:current:subscription:updated", subscription
+      broadcast_user_event!(subscription.user, "user:current:subscription:updated", subscription)
     end)
 
     :ok
