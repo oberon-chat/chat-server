@@ -21,13 +21,13 @@ defmodule ChatWebsocket.SupportRoomsChannel do
 
   intercept ["presence_diff"]
 
-  def handle_out("presence_diff", msg, socket) do
-    push socket, "rooms:support:diff", msg
+  def handle_out("presence_diff", payload, socket) do
+    push socket, "rooms:support:diff", payload
 
     {:noreply, socket}
   end
-  def handle_out(event, msg, socket) do
-    push socket, event, msg
+  def handle_out(event, payload, socket) do
+    push socket, event, payload
 
     {:noreply, socket}
   end
