@@ -1,7 +1,7 @@
 defmodule ChatServer.DeleteMessage do
   alias ChatServer.Schema
 
-  def call(params, user) do
+  def call(user, params) do
     # TODO: verify user is still allowed to make updates in room
 
     with {:ok, record} <- get_record(params),

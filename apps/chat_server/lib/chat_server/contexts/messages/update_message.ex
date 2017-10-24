@@ -1,16 +1,17 @@
 defmodule ChatServer.UpdateMessage do
+  alias ChatServer.Repo
   alias ChatServer.Schema
 
   @allowed_params ["body"]
 
-  def call(params, user) do
+  def call(user, params) do
     # TODO: verify user is still allowed to post message to room
 
     with record <- get_record(params),
          true <- owner?(record, user),
          {:ok, record} <- update_record(record, params),
          :ok <- broadcast_update(record) do
-      {:ok, Schema.Message.preload(record, [:room, :user])}
+      {:ok, Repo.preload(record, [:room, :user])}
     else
       _ -> {:error, "Error updating message"}
     end

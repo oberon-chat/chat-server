@@ -53,6 +53,12 @@ defmodule ChatServer.Schema.Subscription do
     |> Repo.insert
   end
 
+  def update(%Subscription{} = subscription, params) do
+    subscription
+    |> update_changeset(params)
+    |> Repo.update
+  end
+
   def delete(%Subscription{} = subscription) do
     Repo.delete(subscription)
   end

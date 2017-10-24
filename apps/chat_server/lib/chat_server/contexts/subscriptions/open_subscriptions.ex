@@ -38,7 +38,7 @@ defmodule OpenSubscriptions do
 
   defp update_record(subscription) do
     subscription
-    |> Schema.Subscription.update_changeset(%{state: "open"})
+    |> Schema.Subscription.update(%{state: "open"})
     |> Repo.update
   end
 end
