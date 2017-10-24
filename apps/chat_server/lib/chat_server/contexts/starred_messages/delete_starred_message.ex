@@ -1,20 +1,19 @@
 defmodule ChatServer.DeleteStarredMessage do
+  require Logger
+
   alias ChatServer.Schema
 
-  def call(params, user, message) do
-    with record <- get_record(user, message),
-         {:ok, _record} <- delete_record(record) do
-      {:ok, Map.get(params,"id")}
+  def call(message_id, user) do
+    message = Schema.Message.get(message_id)
+    starred_message = Schema.StarredMessage.find_by_message_and_user(user, message)
+    star_id = starred_message.id
+    with {:ok, _record} <- Schema.StarredMessage.delete(starred_message) do
+        {:ok, star_id}
     else
-      _ -> {:error, "Error deleting starred message"}
+      error ->
+        Logger.debug "Error deleting starred message" <> inspect(error)
+          {:error, "Error deleting starred message"}
     end
   end
 
-  defp get_record(user, message) do
-    Schema.StarredMessage.find_by_message_and_user(user, message)
-  end
-
-  defp delete_record(record) do
-    Schema.StarredMessage.delete(record)
-  end
 end
