@@ -6,6 +6,7 @@ defmodule ChatWebsocket.RoomsChannel do
   alias ChatServer.TrackRooms
   alias ChatServer.GetStarredMessages
   alias ChatServer.CreateStarredMessage
+  alias ChatServer.DeleteStarredMessage
 
   def join("rooms", _, socket) do
     send self(), :after_join
@@ -38,6 +39,12 @@ defmodule ChatWebsocket.RoomsChannel do
   def handle_in("starred_message:create", message_id, socket) do
     with {:ok, record} <- CreateStarredMessage.call(message_id, socket.assigns.user) do
       push socket, "starred_message:created", record
+    end
+  end
+
+  def handle_in("starred_message:delete", message_id, socket) do
+    with {:ok, star_id} <- DeleteStarredMessage.call(message_id, socket.assigns.user) do
+      push socket, "starred_message:deleted", star_id
     end
   end
 end
