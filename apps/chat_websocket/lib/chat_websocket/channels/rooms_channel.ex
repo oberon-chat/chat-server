@@ -40,11 +40,13 @@ defmodule ChatWebsocket.RoomsChannel do
     with {:ok, record} <- CreateStarredMessage.call(message_id, socket.assigns.user) do
       push socket, "starred_message:created", record
     end
+    {:noreply, socket}
   end
 
   def handle_in("starred_message:delete", message_id, socket) do
     with {:ok, star_id} <- DeleteStarredMessage.call(message_id, socket.assigns.user) do
       push socket, "starred_message:deleted", star_id
     end
+    {:noreply, socket}
   end
 end
