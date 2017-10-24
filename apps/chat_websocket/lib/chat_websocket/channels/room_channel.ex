@@ -8,8 +8,6 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.TrackRooms
   alias ChatServer.TrackRoomUsers
   alias ChatServer.UpdateMessage
-  alias ChatServer.CreateStarredMessage
-  alias ChatServer.DeleteStarredMessage
 
   def join("room:" <> name, _, socket) do
     case Schema.Room.get_by(name: name) do
