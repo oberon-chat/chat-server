@@ -1,6 +1,8 @@
 defmodule ChatWebsocket.RoomChannel do
   use Phoenix.Channel
 
+  import ChatWebsocket.ChannelHelpers
+
   alias ChatServer.Room
   alias ChatServer.Schema
   alias ChatServer.CreateMessage
@@ -37,7 +39,7 @@ defmodule ChatWebsocket.RoomChannel do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, subscription} <- CreateSubscription.call(user, room) do
-      push socket, "user:subscription:created", subscription
+      ChatPubSub.broadcast! user_topic(socket), "user:current:subscription:created", subscription
       broadcast! socket, "room:subscription:created", subscription
     end
 
@@ -59,7 +61,8 @@ defmodule ChatWebsocket.RoomChannel do
 
     with {:ok, record} <- CreateMessage.call(params, room, user),
          {:ok, _} <- Room.create_message(socket, record),
-         :ok <- OpenSubscriptions.call(room) do
+         {:ok, subscriptions} <- OpenSubscriptions.call(room),
+         :ok <- broadcast_user_subscriptions!(subscriptions) do
       broadcast! socket, "message:created", record
     end
 
@@ -86,6 +89,14 @@ defmodule ChatWebsocket.RoomChannel do
     end
 
     {:noreply, socket}
+  end
+
+  defp broadcast_user_subscriptions!(subscriptions) do
+    Enum.map(subscriptions, fn (subscription) ->
+      ChatPubSub.broadcast! user_topic(subscription.user), "user:current:subscription:updated", subscription
+    end)
+
+    :ok
   end
 
   # Filters

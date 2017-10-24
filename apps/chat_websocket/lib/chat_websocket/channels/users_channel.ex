@@ -33,21 +33,6 @@ defmodule ChatWebsocket.UsersChannel do
     {:noreply, socket}
   end
 
-  # Filters
-
-  intercept ["presence_diff"]
-
-  def handle_out("presence_diff", payload, socket) do
-    push socket, "users:connected:diff", payload
-
-    {:noreply, socket}
-  end
-  def handle_out(event, payload, socket) do
-    push socket, event, payload
-
-    {:noreply, socket}
-  end
-
   # Additional Topics
 
   @doc """
@@ -63,6 +48,21 @@ defmodule ChatWebsocket.UsersChannel do
   can be used to filter data before pushing it over the channel.
   """
   def handle_info(%Broadcast{event: event, payload: payload}, socket) do
+    push socket, event, payload
+
+    {:noreply, socket}
+  end
+
+  # Filters
+
+  intercept ["presence_diff"]
+
+  def handle_out("presence_diff", payload, socket) do
+    push socket, "users:connected:diff", payload
+
+    {:noreply, socket}
+  end
+  def handle_out(event, payload, socket) do
     push socket, event, payload
 
     {:noreply, socket}

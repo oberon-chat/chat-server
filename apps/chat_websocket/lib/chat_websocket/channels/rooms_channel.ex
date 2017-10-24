@@ -1,10 +1,11 @@
 defmodule ChatWebsocket.RoomsChannel do
   use Phoenix.Channel
 
+  import ChatWebsocket.ChannelHelpers
+
   alias ChatServer.CreateRoom
   alias ChatServer.CreateDirectRoom
   alias ChatServer.CreateSubscription
-  alias ChatServer.GetUser
   alias ChatServer.ListPublicRooms
   alias ChatServer.Room
 
@@ -25,13 +26,11 @@ defmodule ChatWebsocket.RoomsChannel do
   end
 
   def handle_in("rooms:create", %{"type" => "direct"} = params, socket) do
-    with {:ok, record, subscription} <- CreateDirectRoom.call(socket.assigns.user, params),
-         {:ok, _} <- Room.start(record) do
-      # TODO: Whenever message is created, set both subscriptions to open.
-      # TODO: publish subscription to other user
-      push socket, "user:subscription:created", subscription
-
-      reply(:ok, %{room: record}, socket)
+    with {:ok, result} <- CreateDirectRoom.call(socket.assigns.user, params),
+         {:ok, _} <- Room.start(result.record),
+         :ok <- broadcast_user_subscription!(result.primary_user, result.primary_subscription),
+         :ok <- broadcast_user_subscription!(result.secondary_user, result.secondary_subscription) do
+      reply(:ok, %{room: result.record}, socket)
     else
       _ -> reply(:error, "Error creating room", socket)
     end
@@ -42,18 +41,20 @@ defmodule ChatWebsocket.RoomsChannel do
     with {:ok, record} <- CreateRoom.call(user, params),
          {:ok, _} <- Room.start(record),
          {:ok, subscription} <- CreateSubscription.call(user, record),
-         :ok <- maybe_broadcast_room_creation(socket, record) do
-      push socket, "user:subscription:created", subscription
-
+         :ok <- maybe_broadcast_room_creation!(socket, record),
+         :ok <- broadcast_user_subscription!(user, subscription) do
       reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error creating room", socket)
     end
   end
 
-  defp maybe_broadcast_room_creation(socket, record) do
+  defp broadcast_user_subscription!(user, subscription),
+    do: ChatPubSub.broadcast! user_topic(user), "user:current:subscription:created", subscription
+
+  defp maybe_broadcast_room_creation!(socket, record) do
     case record.type do
-      "public" -> broadcast socket, "rooms:public:created", record
+      "public" -> broadcast! socket, "rooms:public:created", record
       _ -> :ok
     end
   end

@@ -13,9 +13,15 @@ defmodule ChatServer.CreateDirectRoom do
     with {:ok, secondary_user} <- GetUser.call(Map.get(params, "user_id")),
          {:error, _} <- GetDirectRoom.call(primary_user, secondary_user),
          {:ok, record} <- create_record(primary_user, secondary_user),
-         {:ok, subscription} <- create_primary_subscription(primary_user, record),
-         {:ok, _} <- create_secondary_subscription(secondary_user, record) do
-      {:ok, record, subscription}
+         {:ok, primary_subscription} <- create_primary_subscription(primary_user, record),
+         {:ok, secondary_subscription} <- create_secondary_subscription(secondary_user, record) do
+      {:ok, %{
+        primary_subscription: primary_subscription,
+        primary_user: primary_user,
+        record: record,
+        secondary_subscription: secondary_subscription,
+        secondary_user: secondary_user,
+      }}
     else
       _ -> {:error, "Error creating room"}
     end
