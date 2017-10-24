@@ -16,8 +16,8 @@ defmodule ChatServer.Schema.StarredMessage do
   def changeset(struct, params) do
     struct
     |> cast(params, [:message_id, :user_id])
-    |> assoc_constraint(:message)
-    |> assoc_constraint(:user)
+    |> cast_assoc(:message)
+    |> cast_assoc(:user)
   end
 
   # Queries
@@ -32,14 +32,14 @@ defmodule ChatServer.Schema.StarredMessage do
     |> Repo.all
   end
 
-  def find_by_message_and_user(user, message) do
+  def find_by_message_and_user(message, user) do
     user_id = Map.get(user, :id)
     message_id = Map.get(message, :id)
     starred_message_query(user_id, message_id)
   end
 
   defp starred_message_query(user_id, message_id) do
-    Repo.get(StarredMessage, user_id: user_id, message_id: message_id)
+    Repo.get_by(StarredMessage, user_id: user_id, message_id: message_id)
   end
 
   defp starred_messages_query(user_id) do
