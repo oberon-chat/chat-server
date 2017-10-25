@@ -9,7 +9,7 @@ defmodule ChatServer.DeleteStarredMessage do
     star_id = Map.get(starred_message, :id)
 
     with {:ok, _record} <- Schema.StarredMessage.delete(starred_message) do
-        {:ok, star_id}
+        {:ok, %{id: star_id}}
     else
       error ->
         Logger.debug "Error deleting starred message" <> inspect(error)
