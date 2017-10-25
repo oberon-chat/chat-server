@@ -8,7 +8,7 @@ defmodule ChatServer.UpdateMessage do
     # TODO: verify user is still allowed to post message to room
 
     with record <- get_record(params),
-         true <- owner?(record, user),
+         true <- owner?(user, record),
          {:ok, record} <- update_record(record, params),
          :ok <- broadcast_update(record) do
       {:ok, Repo.preload(record, [:room, :user])}
@@ -23,7 +23,7 @@ defmodule ChatServer.UpdateMessage do
     |> Schema.Message.get
   end
 
-  defp owner?(record, user) do
+  defp owner?(user, record) do
     user.id == record.user_id
   end
 

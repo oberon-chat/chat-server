@@ -5,7 +5,7 @@ defmodule ChatServer.DeleteMessage do
     # TODO: verify user is still allowed to make updates in room
 
     with {:ok, record} <- get_record(params),
-         true <- owner?(record, user),
+         true <- owner?(user, record),
          {:ok, record} <- delete_record(record),
          :ok <- broadcast_delete(record) do
       {:ok, record}
@@ -23,7 +23,7 @@ defmodule ChatServer.DeleteMessage do
     end
   end
 
-  defp owner?(record, user) do
+  defp owner?(user, record) do
     user.id == record.user_id
   end
 

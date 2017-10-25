@@ -12,7 +12,7 @@ defmodule ChatServer.UpdateSubscription do
     end
   end
   def call(user, %Schema.Subscription{} = subscription, params) do
-    with true <- owner?(subscription, user),
+    with true <- owner?(user, subscription),
          {:ok, subscription} <- update_record(subscription, params),
          :ok <- broadcast_update(subscription) do
       {:ok, Repo.preload(subscription, [:room, :user])}
