@@ -1,26 +1,29 @@
 defmodule ChatServer.DeleteMessage do
   alias ChatServer.Schema
 
-  def call(params, user) do
+  def call(user, params) do
     # TODO: verify user is still allowed to make updates in room
 
-    with record <- get_record(params),
-         true <- owner?(record, user),
+    with {:ok, record} <- get_record(params),
+         true <- owner?(user, record),
          {:ok, record} <- delete_record(record),
          :ok <- broadcast_delete(record) do
-      {:ok, Map.get(params, "id")}
+      {:ok, record}
     else
       _ -> {:error, "Error deleting message"}
     end
   end
 
   defp get_record(params) do
-    params
-    |> Map.get("id")
-    |> Schema.Message.get
+    id = Map.get(params, "id")
+
+    case Schema.Message.get(id) do
+      nil -> {:error, "Record not found"}
+      record -> {:ok, record}
+    end
   end
 
-  defp owner?(record, user) do
+  defp owner?(user, record) do
     user.id == record.user_id
   end
 

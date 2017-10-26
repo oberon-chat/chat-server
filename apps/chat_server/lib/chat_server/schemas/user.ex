@@ -1,6 +1,8 @@
 defmodule ChatServer.Schema.User do
   use ChatServer.Schema
 
+  import Ecto.Query
+
   @derive {
     Poison.Encoder,
     except: [:__meta__, :inserted_at, :updated_at]
@@ -9,8 +11,13 @@ defmodule ChatServer.Schema.User do
   @default_type "user"
 
   schema "users" do
+    field :active, :boolean, default: true
     field :name, :string
     field :type, :string, default: @default_type
+
+    has_many :subscriptions, Schema.Subscription, on_delete: :delete_all
+    has_many :rooms, through: [:subscriptions, :room]
+
     many_to_many :groups, Schema.Group, join_through: "users_groups", on_delete: :delete_all, on_replace: :delete
     many_to_many :starred_messages, Schema.Message, join_through: "starred_messages", on_delete: :delete_all, on_replace: :delete
     timestamps()
@@ -20,7 +27,7 @@ defmodule ChatServer.Schema.User do
 
   def changeset(struct, params) do
     struct
-    |> cast(params, [:id, :name, :type])
+    |> cast(params, [:id, :active, :name, :type])
     |> validate_required(:name)
     |> update_change(:type, &downcase/1)
     |> validate_inclusion(:type, ["guest", "user"])
@@ -37,6 +44,8 @@ defmodule ChatServer.Schema.User do
   defp downcase(_), do: nil
 
   # Queries
+
+  def active, do: User |> where(active: true) |> Repo.all
 
   def get(id), do: Repo.get(User, id)
 

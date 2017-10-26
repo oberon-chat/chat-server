@@ -2,7 +2,7 @@ defmodule ChatServer.RoomSupervisor do
   use Supervisor
 
   def start_link(opts \\ []) do
-    Supervisor.start_link(__MODULE__, :ok, name: (opts[:name] || __MODULE__))
+    Supervisor.start_link(__MODULE__, :ok, name: (opts[:slug] || __MODULE__))
   end
 
   def init(:ok) do
