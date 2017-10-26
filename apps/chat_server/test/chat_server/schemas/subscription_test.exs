@@ -10,6 +10,30 @@ defmodule ChatServer.Schema.SubscriptionTest do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
   end
 
+  describe "changeset" do
+    test "it receives a default state from the schema definition" do
+      params = %{}
+      changeset = Subscription.changeset(%Subscription{}, params)
+
+      assert changeset.data.state == "open"
+    end
+
+    test "state gets downcased" do
+      params = %{state: "CLOSED"}
+      changeset = Subscription.changeset(%Subscription{}, params)
+
+      assert changeset.changes.state == "closed"
+    end
+
+    test "state must be in enum options" do
+      params = %{state: "invalid-test"}
+      changeset = Subscription.changeset(%Subscription{}, params)
+
+      assert changeset.valid? == false
+      assert changeset.errors == [state: {"is invalid", [validation: :inclusion]}]
+    end
+  end
+
   describe "create" do
     setup do
       room = insert(:room) |> Repo.preload([:users])

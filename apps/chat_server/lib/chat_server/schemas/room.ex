@@ -10,13 +10,15 @@ defmodule ChatServer.Schema.Room do
     except: [:__meta__, :inserted_at, :updated_at]
   }
 
+  @allowed_states ["active", "archived"]
+  @default_state "active"
+  @allowed_types ["public", "private", "direct", "support"]
   @default_type "public"
-  @default_status "active"
   @default_messages_limit 50
 
   schema "rooms" do
     field :type, :string, default: @default_type
-    field :status, :string, default: @default_status
+    field :state, :string, default: @default_state
     field :slug, :string
     field :name, :string
 
@@ -31,14 +33,14 @@ defmodule ChatServer.Schema.Room do
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :slug, :status, :type])
-    |> update_change(:status, &downcase/1)
+    |> cast(params, [:name, :slug, :state, :type])
+    |> update_change(:state, &downcase/1)
     |> update_change(:type, &downcase/1)
     |> validate_required(:name)
-    |> validate_inclusion(:status, ["active", "archived"])
-    |> validate_inclusion(:type, ["public", "private", "direct", "support"])
-    |> unique_constraint(:name, name: :rooms_name_status_index)
-    |> unique_constraint(:slug, slug: :rooms_slug_status_index)
+    |> validate_inclusion(:state, @allowed_states)
+    |> validate_inclusion(:type, @allowed_types)
+    |> unique_constraint(:name, name: :rooms_name_state_index)
+    |> unique_constraint(:slug, slug: :rooms_slug_state_index)
     |> create_slug
   end
 
@@ -47,6 +49,7 @@ defmodule ChatServer.Schema.Room do
 
   def create_slug(set) do
     with nil <- Map.get(set.data, :slug, nil),
+         nil <- Map.get(set.changes, :slug, nil),
          name <- Map.get(set.changes, :name, nil) do
       put_change(set, :slug, Util.String.slugify(name))
     else
@@ -60,20 +63,13 @@ defmodule ChatServer.Schema.Room do
 
   def active do
     Room
-    |> where(status: "active")
+    |> where(state: "active")
     |> Repo.all
   end
 
   def get(id), do: Repo.get(Room, id)
 
   def get_by(params), do: Repo.get_by(Room, params)
-
-  def get_or_create_by(params) do
-    case get_by(params) do
-      nil -> create(params)
-      room -> {:ok, room}
-    end
-  end
 
   def get_messages(id, opts \\ [])
   def get_messages(id, opts) when is_bitstring(id) do
