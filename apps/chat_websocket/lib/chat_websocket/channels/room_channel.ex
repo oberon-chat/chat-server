@@ -9,16 +9,24 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.DeleteMessage
   alias ChatServer.DeleteSubscription
   alias ChatServer.GetRoom
+  alias ChatServer.GetSubscription
   alias ChatServer.ListSubscriptions
   alias ChatServer.UpdateMessage
   alias ChatServer.UpdateSubscription
 
   def join("room:" <> slug, _, socket) do
-    case GetRoom.call(slug: slug) do
-      {:ok, room} -> join_room(socket, room)
-      {:error, _} -> {:error, "Room #{slug} does not exist"}
+    with {:ok, room} <- GetRoom.call(slug: slug),
+         {:ok, _} <- joinable?(socket.assigns.user, room) do
+      join_room(socket, room)
+    else
+      _ -> {:error, "Error connecting to room channel"}
     end
   end
+
+  defp joinable?(_user, %{type: "public"} = room), do: {:ok, room}
+  defp joinable?(_user, %{type: "support"} = room), do: {:ok, room}
+  defp joinable?(user, %{type: "direct"} = room), do: GetSubscription.call(user, room)
+  defp joinable?(user, %{type: "private"} = room), do: GetSubscription.call(user, room)
 
   defp join_room(socket, room) do
     send self(), :after_join
