@@ -9,6 +9,7 @@ defmodule ChatWebsocket.UserSocket do
   ## Channels
   channel "room:*", ChatWebsocket.RoomChannel
   channel "rooms", ChatWebsocket.RoomsChannel
+  channel "support_rooms", ChatWebsocket.SupportRoomsChannel
   channel "users", ChatWebsocket.UsersChannel
 
   ## Transports

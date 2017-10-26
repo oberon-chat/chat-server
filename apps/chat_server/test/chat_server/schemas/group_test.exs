@@ -22,7 +22,7 @@ defmodule ChatServer.Schema.GroupTest do
       params = %{name: "Hello World"}
       changeset = Group.changeset(%Group{}, params)
 
-      assert changeset.changes.slug == "helloworld"
+      assert changeset.changes.slug == "hello-world"
     end
 
     test "slug is not changed on update" do

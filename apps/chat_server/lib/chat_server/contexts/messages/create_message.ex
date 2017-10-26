@@ -5,7 +5,7 @@ defmodule ChatServer.CreateMessage do
 
   @allowed_params ["body"]
 
-  def call(params, room, user) do
+  def call(user, room, params) do
     # TODO: verify user is allowed to post message to room
 
     with {:ok, record} <- create_record(params, room, user),

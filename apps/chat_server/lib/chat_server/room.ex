@@ -1,12 +1,15 @@
 defmodule ChatServer.Room do
+  require Logger
+
   use GenServer
 
   alias ChatServer.RoomSupervisor
-  alias ChatServer.TrackRooms
   alias ChatServer.Schema
+  alias ChatServer.TrackRooms
+  alias ChatServer.TrackSupportRooms
 
   defmodule State do
-    defstruct [:room, messages: []]
+    defstruct [:room, :last_message, messages: []]
   end
 
   def start(room) do
@@ -18,18 +21,16 @@ defmodule ChatServer.Room do
   end
 
   def stop(room_pid) do
-    name = get_name(room_pid)
-
     with :ok <- Supervisor.terminate_child(RoomSupervisor, room_pid) do
-      ChatPubSub.broadcast! "rooms", "room:deleted", %{room: name}
+      ChatPubSub.broadcast! "rooms", "room:deleted", %{room: get_slug(room_pid)}
     end
   end
 
-  def get_name(%Phoenix.Socket{} = socket) do
-    GenServer.call(get_pid(socket), {:get_name})
+  def get_slug(%Phoenix.Socket{} = socket) do
+    GenServer.call(get_pid(socket), {:get_slug})
   end
-  def get_name(pid) do
-    GenServer.call(pid, {:get_name})
+  def get_slug(pid) do
+    GenServer.call(pid, {:get_slug})
   end
 
   def get_message(%Phoenix.Socket{} = socket, id) do
@@ -68,12 +69,21 @@ defmodule ChatServer.Room do
     GenServer.call(pid, {:delete_message, message})
   end
 
+  # Callbacks
+
   def init(room) do
-    {:ok, %State{room: room, messages: Schema.Room.get_messages(room)}}
+    Logger.info "Started room process #{room.slug} (#{room.id})"
+
+    {:ok, _} = TrackRooms.track(self(), room)
+    messages = Schema.Room.get_messages(room)
+
+    TrackSupportRooms.track(self(), room)
+
+    {:ok, %State{room: room, last_message: get_last(messages), messages: messages}}
   end
 
-  def handle_call({:get_name}, _from, %{room: room} = state) do
-    {:reply, %{name: room.name}, state}
+  def handle_call({:get_slug}, _from, %{room: room} = state) do
+    {:reply, %{slug: room.slug}, state}
   end
 
   def handle_call({:get_message, id}, _from, %{messages: messages} = state) do
@@ -85,7 +95,7 @@ defmodule ChatServer.Room do
   end
 
   def handle_call({:create_message, message}, _from, %{messages: messages} = state) do
-    {:reply, {:ok, message}, %{state | messages: [message | messages]}}
+    {:reply, {:ok, message}, %{state | last_message: message, messages: [message | messages]}}
   end
 
   def handle_call({:update_message, message}, _from, %{messages: messages} = state) do
@@ -96,9 +106,9 @@ defmodule ChatServer.Room do
   end
 
   def handle_call({:delete_message, message}, _from, %{messages: messages} = state) do
-    id = Map.get(message, "id")
+    remaining = remove_message(messages, Map.get(message, "id"))
 
-    {:reply, {:ok, message}, %{state | messages: remove_message(messages, id)}}
+    {:reply, {:ok, message}, %{state | last_message: get_last(remaining), messages: remaining}}
   end
 
   def handle_info(_message, state) do
@@ -128,4 +138,7 @@ defmodule ChatServer.Room do
   defp get_pid(socket) do
     TrackRooms.get_pid(socket.assigns[:room])
   end
+
+  defp get_last([]), do: nil
+  defp get_last(messages), do: hd(messages)
 end
