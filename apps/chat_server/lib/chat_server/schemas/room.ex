@@ -64,6 +64,12 @@ defmodule ChatServer.Schema.Room do
     |> Repo.all
   end
 
+  def archived do
+    Room
+    |> where(status: "archived")
+    |> Repo.all
+  end
+
   def get(id), do: Repo.get(Room, id)
 
   def get_by(params), do: Repo.get_by(Room, params)
@@ -114,5 +120,15 @@ defmodule ChatServer.Schema.Room do
     %Room{}
     |> changeset(params)
     |> Repo.insert
+  end
+
+  def update(%Room{} = room, params) do
+    room
+    |> changeset(params)
+    |> Repo.update
+  end
+
+  def delete(%Room{} = room) do
+    Repo.delete(room)
   end
 end
