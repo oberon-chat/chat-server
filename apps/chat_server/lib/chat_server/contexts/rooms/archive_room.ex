@@ -24,7 +24,7 @@ defmodule ChatServer.ArchiveRoom do
 
   defp archive_room(params) do
     changeset = params
-    |> Map.take(["id", "name"])
+    |> Map.take([:id, :name])
     |> Map.put(:status, "archived")
 
     Schema.Room.update(params, changeset)
