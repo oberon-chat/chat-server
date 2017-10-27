@@ -42,6 +42,8 @@ defmodule ChatServer.Schema.User do
 
   # Queries
 
+  def all, do: Repo.all(User)
+
   def get(id), do: Repo.get(User, id)
 
   def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
