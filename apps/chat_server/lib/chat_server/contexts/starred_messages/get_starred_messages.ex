@@ -3,7 +3,7 @@ defmodule ChatServer.GetStarredMessages do
 
   def call(%Schema.User{} = user) do
     case Schema.StarredMessage.get_by_user(user) do
-      _starred_messages -> {:ok, _starred_messages}
+      starred_messages -> {:ok, starred_messages}
     end
   end
 end
