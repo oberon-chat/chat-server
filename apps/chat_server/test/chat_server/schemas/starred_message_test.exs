@@ -22,9 +22,7 @@ defmodule ChatServer.Schema.StarredMessageTest do
     test "Is valid when associated user and message are valid", %{user: user, message: message} do
       params = %{user_id: user.id, message_id: message.id}
       changeset = StarredMessage.changeset(%StarredMessage{}, params)
-       assert changeset.valid?
+      assert changeset.valid?
     end
   end
-
-
 end

@@ -22,10 +22,8 @@ defmodule ChatWebsocket.RoomsChannel do
 
   def handle_info(:after_join, socket) do
     %{user: user} = socket.assigns
-
-    push socket, "starred_messages", GetStarredMessages.call(user)
+    push socket, "starred_messages", %{starred_messages: GetStarredMessages.call(user)}
     push socket, "rooms:public", %{rooms: ListPublicRooms.call(user)}
-
     {:noreply, socket}
   end
 

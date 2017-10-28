@@ -3,6 +3,7 @@ defmodule ChatServer.Repo.Migrations.AddStarredMessagesTable do
 
   def change do
     create table(:starred_messages, primary_key: false) do
+      add :id, :binary_id, primary_key: true
       add :user_id, references(:users, type: :uuid)
       add :message_id, references(:messages, type: :uuid)
       timestamps()
