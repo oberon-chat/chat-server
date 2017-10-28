@@ -24,10 +24,10 @@ defmodule ChatServer.Schema.StarredMessage do
     Repo.get(StarredMessage, id)
   end
 
-  def get_by_user(user) do
-    Map.get(user, :id)
-    |> starred_messages_query
-    |> Repo.all
+  def get_by_user(%Schema.User{} = user) do
+     Map.get(user, :id)
+     |> starred_messages_query
+     |> Repo.all
   end
 
   def find_by_message_and_user(message, user) do
