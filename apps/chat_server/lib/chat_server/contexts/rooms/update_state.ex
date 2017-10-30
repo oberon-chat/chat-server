@@ -9,7 +9,7 @@ defmodule ChatServer.UpdateState do
     defstruct [:room]
   end
 
-  def call(params \\ %{}, _user, state \\ "active") do
+  def call(params \\ %{}, _user, state) do
     Logger.info "Updating room " <> inspect(params)
 
     # TODO verify user is allowed to update room of that type
