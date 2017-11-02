@@ -28,17 +28,21 @@ defmodule ChatWebsocket.RoomsChannel do
   end
 
   def handle_in("starred_message:create", message_id, socket) do
-    with {:ok, record} <- CreateStarredMessage.call(message_id, socket.assigns.user) do
-      push socket, "starred_message:created", record
+    with {:ok, record} <- CreateStarredMessage.call(message_id, socket.assigns.user),
+         :ok <- push(socket, "starred_message:created", record) do
+      reply(:ok, %{starred_message: record}, socket)
+    else
+      _ -> reply(:error, "Error creating StarredMessage", socket)
     end
-    {:noreply, socket}
   end
 
   def handle_in("starred_message:delete", message_id, socket) do
-    with {:ok, star_id} <- DeleteStarredMessage.call(message_id, socket.assigns.user) do
-      push socket, "starred_message:deleted", star_id
+    with {:ok, star_id} <- DeleteStarredMessage.call(message_id, socket.assigns.user),
+         :ok <- push(socket,"starred_message:deleted", star_id) do
+      reply(:ok, %{starred_message: star_id}, socket)
+    else
+      _ -> reply(:error, "Error deleting StarredMessage", socket)
     end
-    {:noreply, socket}
   end
 
   def handle_in("rooms:create", %{"type" => "direct"} = params, socket) do
