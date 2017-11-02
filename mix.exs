@@ -2,11 +2,13 @@ defmodule Chat.Platform.Mixfile do
   use Mix.Project
 
   def project do
-    [apps_path: "apps",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps(),
-     preferred_cli_env: preferred_cli_env()]
+    [
+      apps_path: "apps",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      deps: deps(),
+      preferred_cli_env: preferred_cli_env()
+    ]
   end
 
   # Dependencies can be Hex packages:
