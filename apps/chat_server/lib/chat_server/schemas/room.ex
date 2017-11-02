@@ -5,11 +5,6 @@ defmodule ChatServer.Schema.Room do
 
   alias ChatServer.Schema.Room
 
-  @derive {
-    Poison.Encoder,
-    except: [:__meta__, :inserted_at, :updated_at]
-  }
-
   @allowed_states ["active", "archived"]
   @default_state "active"
   @allowed_types ["public", "private", "direct", "support"]
