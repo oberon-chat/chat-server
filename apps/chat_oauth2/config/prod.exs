@@ -15,7 +15,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :chat_oauth2, ChatOAuth2Web.Endpoint,
   load_from_system_env: false,
-  port: System.get_env("CHAT_OAUTH2_PORT"),
+  http: [port: System.get_env("CHAT_OAUTH2_PORT")],
   url: [host: "example.com", port: 80]
 
 # Do not print debug messages in production
