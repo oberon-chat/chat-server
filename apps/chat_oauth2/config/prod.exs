@@ -16,7 +16,9 @@ use Mix.Config
 config :chat_oauth2, ChatOAuth2Web.Endpoint,
   load_from_system_env: false,
   http: [port: System.get_env("CHAT_OAUTH2_PORT")],
-  url: [host: "example.com", port: 80]
+  url: [host: "example.com", port: 80],
+  secret_key_base: System.get_env("CHAT_OAUTH2_SECRET_KEY_BASE"),
+  server: true
 
 # Do not print debug messages in production
 config :logger, level: :info
@@ -66,6 +68,3 @@ config :chat_oauth2, ChatOAuth2.Repo,
   password: System.get_env("CHAT_OAUTH2_POSTGRES_PASS"),
   database: System.get_env("CHAT_OAUTH2_POSTGRES_DB"),
   pool_size: 15
-
-config :chat_oauth2, ChatOAuth2Web.Endpoint,
-  secret_key_base: System.get_env("CHAT_OAUTH2_SECRET_KEY_BASE")

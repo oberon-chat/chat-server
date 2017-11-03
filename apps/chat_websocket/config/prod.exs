@@ -16,7 +16,9 @@ use Mix.Config
 config :chat_websocket, ChatWebsocket.Endpoint,
   load_from_system_env: false,
   http: [port: System.get_env("CHAT_WEBSOCKET_PORT")],
-  url: [host: "example.com", port: 80]
+  url: [host: "example.com", port: 80],
+  secret_key_base: System.get_env("CHAT_WEBSOCKET_SECRET_KEY_BASE"),
+  server: true
 
 # Do not print debug messages in production
 config :logger, level: :info
@@ -58,6 +60,3 @@ config :logger, level: :info
 #
 #     config :chat_websocket, ChatWebsocket.Endpoint, server: true
 #
-
-config :chat_websocket, ChatWebsocket.Endpoint,
-  secret_key_base: System.get_env("CHAT_WEBSOCKET_SECRET_KEY_BASE")
