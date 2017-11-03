@@ -16,8 +16,7 @@ use Mix.Config
 config :chat_websocket, ChatWebsocket.Endpoint,
   load_from_system_env: false,
   port: System.get_env("CHAT_WEBSOCKET_PORT"),
-  url: [host: "example.com", port: 80],
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  url: [host: "example.com", port: 80]
 
 # Do not print debug messages in production
 config :logger, level: :info
