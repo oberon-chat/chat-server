@@ -5,8 +5,8 @@ defmodule ChatServer.CreateStarredMessage do
 
   def call(message_id, user) do
     with message <- Schema.Message.get(message_id),
-      {:ok, record} <- create_record(message, user) do
-        {:ok, Schema.StarredMessage.preload(record, [:message, :user])}
+         {:ok, record} <- create_record(message, user) do
+      {:ok, Schema.StarredMessage.preload(record, [:message, :user])}
     else
       error ->
         Logger.debug "Error starring message " <> inspect(error)
