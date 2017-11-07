@@ -9,7 +9,7 @@ defmodule ChatServer.Schema.Room do
   @default_state "active"
   @allowed_types ["public", "private", "direct", "support"]
   @default_type "public"
-  @default_messages_limit 50
+  @default_messages_limit 10000
 
   schema "rooms" do
     field :type, :string, default: @default_type
