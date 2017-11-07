@@ -1,11 +1,6 @@
 defmodule ChatServer.Schema.Subscription do
   use ChatServer.Schema
 
-  @derive {
-    Poison.Encoder,
-    except: [:__meta__, :inserted_at, :updated_at]
-  }
-
   @allowed_states ["open", "muted", "closed", "ignored"]
   @default_state "open"
 

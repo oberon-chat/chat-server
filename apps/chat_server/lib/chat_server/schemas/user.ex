@@ -3,11 +3,6 @@ defmodule ChatServer.Schema.User do
 
   import Ecto.Query
 
-  @derive {
-    Poison.Encoder,
-    except: [:__meta__, :inserted_at, :updated_at]
-  }
-
   @default_type "user"
 
   schema "users" do
