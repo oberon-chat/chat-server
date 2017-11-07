@@ -9,5 +9,3 @@ config :chat_server, ChatServer.Repo,
   pool_size: 10
 
 config :logger, level: :info
-
-import_config "prod.secret.exs"
