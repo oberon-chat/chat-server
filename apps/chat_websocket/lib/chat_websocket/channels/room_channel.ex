@@ -109,7 +109,8 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("room:subscription:delete", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, subscription} <- DeleteSubscription.call(user, room),
+    with {:ok, subscription} <- GetSubscription.call(user, room),
+         {:ok, _} <- DeleteSubscription.call(user, room),
          :ok <- broadcast_user_event!(user, "user:current:subscription:deleted", subscription),
          :ok <- broadcast!(socket, "room:subscription:deleted", subscription) do
       reply(:ok, %{subscription: subscription}, socket)

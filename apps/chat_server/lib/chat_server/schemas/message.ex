@@ -1,8 +1,6 @@
 defmodule ChatServer.Schema.Message do
   use ChatServer.Schema
 
-  @derive {Poison.Encoder, except: [:__meta__]}
-
   schema "messages" do
     field :body, :string
     field :edited, :boolean, default: false

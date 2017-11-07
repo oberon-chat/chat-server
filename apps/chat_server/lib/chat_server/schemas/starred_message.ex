@@ -1,8 +1,6 @@
 defmodule ChatServer.Schema.StarredMessage do
   use ChatServer.Schema
 
-  @derive {Poison.Encoder, except: [:__meta__]}
-
   schema "starred_messages" do
     belongs_to :user, ChatServer.Schema.User
     belongs_to :message, ChatServer.Schema.Message
