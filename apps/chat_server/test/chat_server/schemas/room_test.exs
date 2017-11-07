@@ -18,11 +18,11 @@ defmodule ChatServer.Schema.RoomTest do
       assert changeset.valid? == true
     end
 
-    test "it receives a default status and type from the schema definition" do
+    test "it receives a default state and type from the schema definition" do
       params = %{name: "Hello"}
       changeset = Room.changeset(%Room{}, params)
 
-      assert changeset.data.status == "active"
+      assert changeset.data.state == "active"
       assert changeset.data.type == "public"
     end
   end
@@ -35,11 +35,11 @@ defmodule ChatServer.Schema.RoomTest do
       assert changeset.changes.name == "HELLO"
     end
 
-    test "status gets downcased" do
-      params = %{status: "ACTive"}
+    test "state gets downcased" do
+      params = %{state: "ACTive"}
       changeset = Room.changeset(%Room{}, params)
 
-      assert changeset.changes.status == "active"
+      assert changeset.changes.state == "active"
     end
 
     test "type gets downcased" do
@@ -90,21 +90,21 @@ defmodule ChatServer.Schema.RoomTest do
       assert changeset.errors == [type: {"is invalid", [validation: :inclusion]}]
     end
 
-    test "status must be in enum options" do
-      params = %{name: "hello", status: "invalid-test"}
+    test "state must be in enum options" do
+      params = %{name: "hello", state: "invalid-test"}
       changeset = Room.changeset(%Room{}, params)
 
       assert changeset.valid? == false
-      assert changeset.errors == [status: {"is invalid", [validation: :inclusion]}]
+      assert changeset.errors == [state: {"is invalid", [validation: :inclusion]}]
     end
 
-    test "name + status must be unique" do
+    test "name + state must be unique" do
       assert {:ok, _} = %Room{}
-        |> Room.changeset(%{name: "hello", status: "active"})
+        |> Room.changeset(%{name: "hello", state: "active"})
         |> Repo.insert
 
       assert {:error, _} = %Room{}
-        |> Room.changeset(%{name: "hello", status: "active"})
+        |> Room.changeset(%{name: "hello", state: "active"})
         |> Repo.insert
     end
   end
