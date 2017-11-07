@@ -1,11 +1,6 @@
 defmodule ChatServer.Schema.Group do
   use ChatServer.Schema
 
-  @derive {
-    Poison.Encoder,
-    except: [:__meta__]
-  }
-
   schema "groups" do
     field :name, :string
     field :slug, :string

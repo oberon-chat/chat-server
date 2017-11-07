@@ -5,16 +5,11 @@ defmodule ChatServer.Schema.Room do
 
   alias ChatServer.Schema.Room
 
-  @derive {
-    Poison.Encoder,
-    except: [:__meta__, :inserted_at, :updated_at]
-  }
-
   @allowed_states ["active", "archived"]
   @default_state "active"
   @allowed_types ["public", "private", "direct", "support"]
   @default_type "public"
-  @default_messages_limit 50
+  @default_messages_limit 10000
 
   schema "rooms" do
     field :type, :string, default: @default_type
