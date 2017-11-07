@@ -3,7 +3,6 @@ defmodule ChatWebsocket.RoomChannel do
 
   import ChatWebsocket.ChannelHelpers
 
-  alias ChatServer.Room
   alias ChatServer.CreateMessage
   alias ChatServer.CreateSubscription
   alias ChatServer.DeleteMessage
@@ -11,6 +10,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.GetRoom
   alias ChatServer.GetSubscription
   alias ChatServer.ListSubscriptions
+  alias ChatServer.Room
   alias ChatServer.UpdateMessage
   alias ChatServer.UpdateSubscription
 

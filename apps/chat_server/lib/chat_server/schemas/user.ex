@@ -14,7 +14,7 @@ defmodule ChatServer.Schema.User do
     has_many :rooms, through: [:subscriptions, :room]
 
     many_to_many :groups, Schema.Group, join_through: "users_groups", on_delete: :delete_all, on_replace: :delete
-
+    many_to_many :starred_messages, Schema.Message, join_through: "starred_messages", on_delete: :delete_all, on_replace: :delete
     timestamps()
   end
 
@@ -28,7 +28,7 @@ defmodule ChatServer.Schema.User do
     |> validate_inclusion(:type, ["guest", "user"])
   end
 
-  def groups_changeset(%User{id: _id} = struct, params) do
+  def update_groups_changeset(%User{id: _id} = struct, params) do
     struct
     |> Repo.preload([:groups])
     |> cast(params, [])
@@ -70,7 +70,7 @@ defmodule ChatServer.Schema.User do
 
   def update_groups(%User{} = user, params) do
     user
-    |> groups_changeset(params)
+    |> update_groups_changeset(params)
     |> Repo.update
   end
 

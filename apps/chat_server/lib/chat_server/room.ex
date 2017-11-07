@@ -43,6 +43,7 @@ defmodule ChatServer.Room do
   def get_messages(%Phoenix.Socket{} = socket) do
     GenServer.call(get_pid(socket), :get_messages)
   end
+
   def get_messages(pid) do
     GenServer.call(pid, :get_messages)
   end
