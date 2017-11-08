@@ -13,6 +13,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.Room
   alias ChatServer.UpdateMessage
   alias ChatServer.UpdateSubscription
+  alias ChatServer.ViewSubscription
 
   def join("room:" <> slug, _, socket) do
     with {:ok, room} <- GetRoom.call(slug: slug),
@@ -98,8 +99,18 @@ defmodule ChatWebsocket.RoomChannel do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, subscription} <- UpdateSubscription.call(user, room, params),
-         :ok <- broadcast_user_event!(user, "user:current:subscription:updated", subscription),
-         :ok <- broadcast!(socket, "room:subscription:updated", subscription) do
+         :ok <- broadcast_user_event!(user, "user:current:subscription:updated", subscription) do
+      reply(:ok, %{subscription: subscription}, socket)
+    else
+      _ -> reply(:error, "Error updating subscription", socket)
+    end
+  end
+
+  def handle_in("room:subscription:view", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, subscription} <- ViewSubscription.call(user, room),
+         :ok <- broadcast_user_event!(user, "user:current:subscription:updated", subscription) do
       reply(:ok, %{subscription: subscription}, socket)
     else
       _ -> reply(:error, "Error updating subscription", socket)

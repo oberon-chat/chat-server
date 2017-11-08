@@ -70,6 +70,7 @@ defmodule ChatServer.Schema.Room do
 
   def get(id), do: Repo.get(Room, id)
 
+  def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
   def get_by(params), do: Repo.get_by(Room, params)
 
   def get_messages(id, opts \\ [])

@@ -6,6 +6,7 @@ defmodule ChatServer.Schema.Subscription do
 
   schema "subscriptions" do
     field :state, :string, default: @default_state
+    field :viewed_at, :utc_datetime
 
     belongs_to :room, Schema.Room
     belongs_to :user, Schema.User
@@ -26,7 +27,7 @@ defmodule ChatServer.Schema.Subscription do
 
   def update_changeset(struct, params) do
     struct
-    |> cast(params, [:state])
+    |> cast(params, [:state, :viewed_at])
     |> update_change(:state, &downcase/1)
     |> validate_inclusion(:state, @allowed_states)
   end
@@ -38,6 +39,7 @@ defmodule ChatServer.Schema.Subscription do
 
   def get(id), do: Repo.get(Subscription, id)
 
+  def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
   def get_by(params), do: Repo.get_by(Subscription, params)
 
   # Mutations

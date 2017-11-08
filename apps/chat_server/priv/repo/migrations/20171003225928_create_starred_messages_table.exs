@@ -1,4 +1,4 @@
-defmodule ChatServer.Repo.Migrations.AddStarredMessagesTable do
+defmodule ChatServer.Repo.Migrations.CreateStarredMessagesTable do
   use Ecto.Migration
 
   def change do

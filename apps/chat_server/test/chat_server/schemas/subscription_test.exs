@@ -52,12 +52,43 @@ defmodule ChatServer.Schema.SubscriptionTest do
       assert subscription.user == user
     end
 
+    test "sets a default values", %{room: room, user: user} do
+      params = %{room: room, user: user}
+
+      {:ok, subscription} = Subscription.create(params)
+
+      assert subscription.state == "open"
+    end
+
     test "raises an exception when passed invalid assocations", %{user: user} do
       params = %{room: nil, user: user}
 
       assert_raise Postgrex.Error, fn () ->
         Subscription.create(params)
       end
+    end
+  end
+
+  describe "update" do
+    setup do
+      room = insert(:room) |> Repo.preload([:users])
+      user = insert(:user) |> Repo.preload([:rooms])
+      {:ok, subscription} = Subscription.create(%{room: room, user: user})
+
+      {:ok, room: room, subscription: subscription, user: user}
+    end
+
+    test "can update attributes", %{room: room, subscription: subscription, user: user} do
+      params = %{state: "muted", viewed_at: DateTime.utc_now()}
+
+      {:ok, subscription} = Subscription.update(subscription, params)
+      subscription = Repo.preload(subscription, [:room, :user])
+
+      assert subscription.room == room
+      assert subscription.user == user
+
+      assert subscription.state == params.state
+      assert subscription.viewed_at == params.viewed_at
     end
   end
 end
