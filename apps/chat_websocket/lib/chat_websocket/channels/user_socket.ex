@@ -4,7 +4,6 @@ defmodule ChatWebsocket.UserSocket do
   use Phoenix.Socket
 
   alias ChatServer.Auth
-  alias ChatServer.Schema
 
   ## Channels
   channel "room:*", ChatWebsocket.RoomChannel
@@ -30,8 +29,7 @@ defmodule ChatWebsocket.UserSocket do
 
   def connect(%{"token" => token}, socket) do
     with {:ok, auth_user} <- Auth.get_user(token),
-         params <- Schema.User.filter_params(:user, auth_user),
-         {:ok, user} <- Schema.User.get_or_create_by(params) do
+         {:ok, user} <- GetSocketUser.call(:user, auth_user) do
       Logger.debug "Socket connection for user #{user.name} (#{user.id})"
       {:ok, assign(socket, :user, user)}
     else
@@ -39,12 +37,10 @@ defmodule ChatWebsocket.UserSocket do
     end
   end
   def connect(%{"type" => "guest"} = params, socket) do
-    params = Schema.User.filter_params(:guest, params)
-
-    Logger.debug "Socket connection for guest user #{Map.get(params, :name)}"
-
-    case Schema.User.get_or_create_by(params) do
-      {:ok, user} -> {:ok, assign(socket, :user, user)}
+    with {:ok, user} <- GetSocketUser.call(params) do
+      Logger.debug "Socket connection for guest #{user.name} (#{user.id})"
+      {:ok, assign(socket, :user, user)}
+    else
       _ -> :error
     end
   end

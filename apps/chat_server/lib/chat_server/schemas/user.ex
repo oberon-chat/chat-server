@@ -47,13 +47,6 @@ defmodule ChatServer.Schema.User do
   def get_by(params) when is_map(params), do: get_by(Enum.into(params, []))
   def get_by(params), do: Repo.get_by(User, params)
 
-  def get_or_create_by(params) do
-    case get_by(params) do
-      nil -> create(params)
-      user -> {:ok, user}
-    end
-  end
-
   # Mutations
 
   def create(params) do
