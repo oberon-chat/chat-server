@@ -34,7 +34,7 @@ defmodule ChatServer.GetSocketUser do
     case Schema.User.create(params) do
       {:ok, user} ->
         broadcast_event(user)
-        {:ok, user}
+        {:created, user}
       _ ->
         {:error, "Error creating user"}
     end
@@ -42,6 +42,5 @@ defmodule ChatServer.GetSocketUser do
 
   defp broadcast_event(user) do
     BroadcastEvent.call("user:created", user)
-    ChatPubSub.broadcast("users", "user:created", user)
   end
 end

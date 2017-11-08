@@ -3,6 +3,8 @@ defmodule ChatWebsocket.UserSocket do
 
   use Phoenix.Socket
 
+  alias ChatServer.GetSocketUser
+
   ## Channels
   channel "room:*", ChatWebsocket.RoomChannel
   channel "rooms", ChatWebsocket.RoomsChannel
@@ -26,11 +28,16 @@ defmodule ChatWebsocket.UserSocket do
   # performing token verification on connect.
 
   def connect(params, socket) do
-    with {:ok, user} <- GetSocketUser.call(params) do
-      Logger.debug "Socket connection for user #{user.name} (#{user.id})"
-      {:ok, assign(socket, :user, user)}
-    else
-      _ -> :error
+    case GetSocketUser.call(params) do
+      {:ok, user} ->
+        Logger.debug "Socket connection for user #{user.name} (#{user.id})"
+        {:ok, assign(socket, :user, user)}
+      {:created, user} ->
+        Logger.debug "Socket connection for user #{user.name} (#{user.id})"
+        ChatPubSub.broadcast! "users", "user:created", user
+        {:ok, assign(socket, :user, user)}
+      _ ->
+        :error
     end
   end
 
