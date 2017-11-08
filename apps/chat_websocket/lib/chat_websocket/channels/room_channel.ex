@@ -13,6 +13,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.Room
   alias ChatServer.UpdateMessage
   alias ChatServer.UpdateSubscription
+  alias ChatServer.ViewSubscription
 
   def join("room:" <> slug, _, socket) do
     with {:ok, room} <- GetRoom.call(slug: slug),
@@ -105,7 +106,7 @@ defmodule ChatWebsocket.RoomChannel do
     end
   end
 
-  def handle_in("room:subscription:view", params, socket) do
+  def handle_in("room:subscription:view", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, subscription} <- ViewSubscription.call(user, room),
