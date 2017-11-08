@@ -1,5 +1,6 @@
 defmodule ChatServer.GetSocketUser do
   alias ChatServer.Auth
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Schema
 
   def call(%{"token" => token}) do
@@ -32,10 +33,15 @@ defmodule ChatServer.GetSocketUser do
   defp create_user(params) do
     case Schema.User.create(params) do
       {:ok, user} ->
-        ChatPubSub.broadcast("users", "user:created", user)
+        broadcast_event(user)
         {:ok, user}
       _ ->
         {:error, "Error creating user"}
     end
+  end
+
+  defp broadcast_event(user) do
+    BroadcastEvent.call("user:created", user)
+    ChatPubSub.broadcast("users", "user:created", user)
   end
 end
