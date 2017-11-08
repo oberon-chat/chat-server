@@ -40,6 +40,8 @@ defmodule ChatServer.Schema.User do
 
   # Queries
 
+  def all, do: Repo.all(User)
+
   def active, do: User |> where(active: true) |> Repo.all
 
   def get(id), do: Repo.get(User, id)
