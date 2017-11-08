@@ -3,8 +3,6 @@ defmodule ChatWebsocket.UserSocket do
 
   use Phoenix.Socket
 
-  alias ChatServer.Auth
-
   ## Channels
   channel "room:*", ChatWebsocket.RoomChannel
   channel "rooms", ChatWebsocket.RoomsChannel
@@ -27,24 +25,14 @@ defmodule ChatWebsocket.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
 
-  def connect(%{"token" => token}, socket) do
-    with {:ok, auth_user} <- Auth.get_user(token),
-         {:ok, user} <- GetSocketUser.call(:user, auth_user) do
+  def connect(params, socket) do
+    with {:ok, user} <- GetSocketUser.call(params) do
       Logger.debug "Socket connection for user #{user.name} (#{user.id})"
       {:ok, assign(socket, :user, user)}
     else
       _ -> :error
     end
   end
-  def connect(%{"type" => "guest"} = params, socket) do
-    with {:ok, user} <- GetSocketUser.call(params) do
-      Logger.debug "Socket connection for guest #{user.name} (#{user.id})"
-      {:ok, assign(socket, :user, user)}
-    else
-      _ -> :error
-    end
-  end
-  def connect(_params, _socket), do: :error
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
   #
