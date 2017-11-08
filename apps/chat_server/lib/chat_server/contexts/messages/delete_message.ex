@@ -1,4 +1,5 @@
 defmodule ChatServer.DeleteMessage do
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Schema
 
   def call(user, params) do
@@ -7,7 +8,7 @@ defmodule ChatServer.DeleteMessage do
     with {:ok, record} <- get_record(params),
          true <- owner?(user, record),
          {:ok, record} <- delete_record(record),
-         :ok <- broadcast_delete(record) do
+         :ok <- broadcast_event(record) do
       {:ok, record}
     else
       _ -> {:error, "Error deleting message"}
@@ -31,7 +32,7 @@ defmodule ChatServer.DeleteMessage do
     Schema.Message.delete(record)
   end
 
-  defp broadcast_delete(record) do
-    ChatPubSub.broadcast! "events", "message:deleted", record
+  defp broadcast_event(message) do
+    BroadcastEvent.call("message:deleted", message)
   end
 end

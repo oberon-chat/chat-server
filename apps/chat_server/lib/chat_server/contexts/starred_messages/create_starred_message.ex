@@ -1,11 +1,13 @@
 defmodule ChatServer.CreateStarredMessage do
   require Logger
 
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Schema
 
   def call(message_id, user) do
     with message <- Schema.Message.get(message_id),
-         {:ok, record} <- create_record(message, user) do
+         {:ok, record} <- create_record(message, user),
+         :ok <- broadcast_event(record) do
       {:ok, Schema.StarredMessage.preload(record, [:message, :user])}
     else
       error ->
@@ -24,5 +26,9 @@ defmodule ChatServer.CreateStarredMessage do
     %{}
     |> Map.put("message_id", Map.get(message, :id, nil))
     |> Map.put("user_id", Map.get(user, :id, nil))
+  end
+
+  defp broadcast_event(starred_message) do
+    BroadcastEvent.call("starred_message:created", starred_message)
   end
 end

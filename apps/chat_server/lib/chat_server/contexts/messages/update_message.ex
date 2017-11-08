@@ -1,4 +1,5 @@
 defmodule ChatServer.UpdateMessage do
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Repo
   alias ChatServer.Schema
 
@@ -10,7 +11,7 @@ defmodule ChatServer.UpdateMessage do
     with record <- get_record(params),
          true <- owner?(user, record),
          {:ok, record} <- update_record(record, params),
-         :ok <- broadcast_update(record) do
+         :ok <- broadcast_event(record) do
       {:ok, Repo.preload(record, [:room, :user])}
     else
       _ -> {:error, "Error updating message"}
@@ -37,7 +38,7 @@ defmodule ChatServer.UpdateMessage do
     |> Map.put("edited", true)
   end
 
-  defp broadcast_update(record) do
-    ChatPubSub.broadcast! "events", "message:updated", record
+  defp broadcast_event(message) do
+    BroadcastEvent.call("message:updated", message)
   end
 end
