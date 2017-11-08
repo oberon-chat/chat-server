@@ -20,10 +20,13 @@ defmodule ChatServer.ViewSubscription do
 
   defp owner?(user, subscription), do: user.id == subscription.user_id
 
+  defp update_record(%{viewed_at: nil} = subscription) do
+    Schema.Subscription.update(subscription, %{viewed_at: DateTime.utc_now})
+  end
   defp update_record(subscription) do
-    case subscription.viewed_at < DateTime.utc_now do
-      true -> Schema.Subscription.update(subscription, %{viewed_at: DateTime.utc_now})
-      false -> {:ok, subscription}
+    case DateTime.compare(subscription.viewed_at, DateTime.utc_now) do
+      :lt -> Schema.Subscription.update(subscription, %{viewed_at: DateTime.utc_now})
+      _ -> {:ok, subscription}
     end
   end
 end
