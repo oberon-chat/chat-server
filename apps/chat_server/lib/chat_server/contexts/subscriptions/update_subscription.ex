@@ -1,4 +1,5 @@
 defmodule ChatServer.UpdateSubscription do
+  alias ChatServer.BroadcastEvent
   alias ChatServer.GetSubscription
   alias ChatServer.Repo
   alias ChatServer.Schema
@@ -14,7 +15,7 @@ defmodule ChatServer.UpdateSubscription do
   def call(user, %Schema.Subscription{} = subscription, params) do
     with true <- owner?(user, subscription),
          {:ok, subscription} <- update_record(subscription, params),
-         :ok <- broadcast_update(subscription) do
+         :ok <- broadcast_event(subscription) do
       {:ok, Repo.preload(subscription, [:room, :user])}
     else
       _ -> {:error, "Error updating subscription"}
@@ -32,7 +33,7 @@ defmodule ChatServer.UpdateSubscription do
     |> Map.take(@allowed_params)
   end
 
-  defp broadcast_update(subscription) do
-    ChatPubSub.broadcast! "internal:events", "subscription:updated", subscription
+  defp broadcast_event(subscription) do
+    BroadcastEvent.call("subscription:updated", subscription)
   end
 end

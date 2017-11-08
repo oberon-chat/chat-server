@@ -1,10 +1,8 @@
 defmodule ChatServer.CreateDirectRoom do
-  import Ecto.Query
-
+  alias ChatServer.BroadcastEvent
   alias ChatServer.CreateSubscription
   alias ChatServer.GetDirectRoom
   alias ChatServer.GetUser
-  alias ChatServer.Repo
   alias ChatServer.Schema
 
   def call(primary_user, params \\ %{}) do
@@ -14,7 +12,8 @@ defmodule ChatServer.CreateDirectRoom do
          {:error, _} <- GetDirectRoom.call(primary_user, secondary_user),
          {:ok, record} <- create_record(primary_user, secondary_user),
          {:ok, primary_subscription} <- create_primary_subscription(primary_user, record),
-         {:ok, secondary_subscription} <- create_secondary_subscription(secondary_user, record) do
+         {:ok, secondary_subscription} <- create_secondary_subscription(secondary_user, record),
+         :ok <- broadcast_event(record) do
       {:ok, %{
         primary_subscription: primary_subscription,
         primary_user: primary_user,
@@ -46,5 +45,9 @@ defmodule ChatServer.CreateDirectRoom do
 
   def create_secondary_subscription(user, room) do
     CreateSubscription.call(user, room.id, state: "closed")
+  end
+
+  defp broadcast_event(room) do
+    BroadcastEvent.call("room:direct:created", room)
   end
 end

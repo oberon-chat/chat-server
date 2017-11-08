@@ -1,6 +1,7 @@
 defmodule ChatServer.CreateMessage do
   require Logger
 
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Schema
 
   @allowed_params ["body"]
@@ -9,7 +10,7 @@ defmodule ChatServer.CreateMessage do
     # TODO: verify user is allowed to post message to room
 
     with {:ok, record} <- create_record(params, room, user),
-         :ok <- broadcast_create(record) do
+         :ok <- broadcast_event(record) do
       {:ok, Schema.Message.preload(record, [:room, :user])}
     else
       error ->
@@ -31,7 +32,7 @@ defmodule ChatServer.CreateMessage do
     |> Map.put("user_id", Map.get(user, :id, nil))
   end
 
-  defp broadcast_create(record) do
-    ChatPubSub.broadcast! "events", "message:created", record
+  defp broadcast_event(message) do
+    BroadcastEvent.call("message:created", message)
   end
 end

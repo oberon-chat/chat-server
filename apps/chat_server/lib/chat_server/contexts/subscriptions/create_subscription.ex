@@ -1,4 +1,5 @@
 defmodule ChatServer.CreateSubscription do
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Repo
   alias ChatServer.Schema
 
@@ -21,10 +22,15 @@ defmodule ChatServer.CreateSubscription do
       |> Map.put(:user, user)
 
     with {:ok, subscription} <- Schema.Subscription.create(params),
-         subscription <- Repo.preload(subscription, [:room, :user]) do
+         subscription <- Repo.preload(subscription, [:room, :user]),
+         :ok <- broadcast_event(subscription) do
       {:ok, subscription}
     else
       _ -> {:eror, "Error creating subscription"}
     end
+  end
+
+  defp broadcast_event(subscription) do
+    BroadcastEvent.call("subscription:created", subscription)
   end
 end

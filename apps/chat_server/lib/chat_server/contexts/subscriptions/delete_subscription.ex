@@ -1,4 +1,5 @@
 defmodule ChatServer.DeleteSubscription do
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Repo
   alias ChatServer.Schema
 
@@ -14,7 +15,8 @@ defmodule ChatServer.DeleteSubscription do
   end
   def call(%Schema.User{} = user, %Schema.Room{} = room) do
     with {:ok, record} <- get_record(user, room),
-         {:ok, _} <- delete_record(record) do
+         {:ok, _} <- delete_record(record),
+         :ok <- broadcast_event(record) do
       {:ok, record}
     else
       _ -> {:error, "Error deleting message"}
@@ -32,5 +34,9 @@ defmodule ChatServer.DeleteSubscription do
 
   defp delete_record(record) do
     Schema.Subscription.delete(record)
+  end
+
+  defp broadcast_event(subscription) do
+    BroadcastEvent.call("subscription:deleted", subscription)
   end
 end

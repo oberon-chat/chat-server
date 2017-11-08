@@ -12,6 +12,7 @@ defmodule OpenSubscriptions do
 
   alias ChatServer.Repo
   alias ChatServer.Schema
+  alias ChatServer.UpdateSubscription
 
   def call(%Schema.Room{type: "direct"} = room) do
     {:ok, open_subscriptions(room)}
@@ -37,6 +38,7 @@ defmodule OpenSubscriptions do
   defp open_subscription(_), do: nil
 
   defp update_record(subscription) do
-    Schema.Subscription.update(subscription, %{state: "open"})
+    subscription = Repo.preload(subscription, [:room, :user])
+    UpdateSubscription.call(subscription.user, subscription.room, %{"state" => "open"})
   end
 end
