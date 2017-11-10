@@ -18,7 +18,7 @@ defmodule ChatServer.Schema.Subscription do
 
   def changeset(struct, params) do
     struct
-    |> cast(params, [:state])
+    |> cast(params, [:state, :viewed_at])
     |> update_change(:state, &downcase/1)
     |> validate_inclusion(:state, @allowed_states)
     |> put_assoc(:user, Map.get(params, :user))
