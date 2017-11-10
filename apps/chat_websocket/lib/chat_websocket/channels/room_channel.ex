@@ -12,8 +12,10 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.ListSubscriptions
   alias ChatServer.Room
   alias ChatServer.UpdateMessage
+  alias ChatServer.UpdateState
   alias ChatServer.UpdateSubscription
   alias ChatServer.ViewSubscription
+
 
   def join("room:" <> slug, _, socket) do
     with {:ok, room} <- GetRoom.call(slug: slug),
@@ -127,6 +129,17 @@ defmodule ChatWebsocket.RoomChannel do
       reply(:ok, %{subscription: subscription}, socket)
     else
       _ -> reply(:error, "Error deleting subscription", socket)
+    end
+  end
+
+  def handle_in("room:archive", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, room_state} <- UpdateState.call(room, user, "archived"),
+         :ok <- broadcast!(socket, "room:archived", room) do
+      reply(:ok, %{room: room_state}, socket)
+    else
+      _ -> reply(:error, "Error archiving room", socket)
     end
   end
 
