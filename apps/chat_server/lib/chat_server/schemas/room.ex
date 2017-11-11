@@ -64,7 +64,7 @@ defmodule ChatServer.Schema.Room do
 
   def archived do
     Room
-    |> where(status: "archived")
+    |> where(state: "archived")
     |> Repo.all
   end
 
