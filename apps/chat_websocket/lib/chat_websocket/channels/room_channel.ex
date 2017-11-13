@@ -135,7 +135,7 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("room:archive", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, room_state} <- UpdateState.call(room, user, "archived"),
+    with {:ok, room_state} <- UpdateState.call(room.id, user, "archived"),
          :ok <- broadcast!(socket, "room:archived", room) do
       reply(:ok, %{room: room_state}, socket)
     else
