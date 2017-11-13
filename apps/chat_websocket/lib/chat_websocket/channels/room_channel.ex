@@ -12,7 +12,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.ListSubscriptions
   alias ChatServer.Room
   alias ChatServer.UpdateMessage
-  alias ChatServer.UpdateState
+  alias ChatServer.UpdateRoom
   alias ChatServer.UpdateSubscription
   alias ChatServer.ViewSubscription
 
@@ -134,7 +134,7 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("room:archive", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, room_state} <- UpdateState.call(room.id, user, "archived"),
+    with {:ok, room_state} <- UpdateRoom.call(room.id, user, "archived"),
          :ok <- broadcast!(socket, "room:archived", room) do
       reply(:ok, %{room: room_state}, socket)
     else
@@ -145,7 +145,7 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("room:activate", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, room_state} <- UpdateState.call(room.id, user, "active"),
+    with {:ok, room_state} <- UpdateRoom.call(room.id, user, "active"),
          :ok <- broadcast!(socket, "room:active", room) do
       reply(:ok, %{room: room_state}, socket)
     else

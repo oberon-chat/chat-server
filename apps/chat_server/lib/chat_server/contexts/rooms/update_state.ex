@@ -1,4 +1,4 @@
-defmodule ChatServer.UpdateState do
+defmodule ChatServer.UpdateRoom do
   require Logger
 
   alias ChatServer.Schema
