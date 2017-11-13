@@ -16,7 +16,6 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.UpdateSubscription
   alias ChatServer.ViewSubscription
 
-
   def join("room:" <> slug, _, socket) do
     with {:ok, room} <- GetRoom.call(slug: slug),
          {:ok, _} <- joinable?(socket.assigns.user, room) do
