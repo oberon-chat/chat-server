@@ -32,8 +32,6 @@ defmodule ChatServer.UpdateRoom do
   end
 
   defp broadcast_update(room) do
-    event = %State{room: room}
-
-    ChatPubSub.broadcast! "events", "room:updated", event
+    BroadcastEvent.call("room:updated", room)
   end
 end
