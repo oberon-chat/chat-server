@@ -9,12 +9,12 @@ defmodule ChatServer.UpdateState do
     defstruct [:room]
   end
 
-  def call(param, _user, state) do
-    Logger.info "Updating room " <> inspect(param)
+  def call(room_id, _user, state) do
+    Logger.info "Updating room " <> inspect(room_id)
 
     # TODO verify user is allowed to update room of that type
 
-    with record <- Schema.Room.get_by(param),
+    with record <- Schema.Room.get(room_id),
          {:ok, record} <- update(record, state),
          :ok <- broadcast_update(record) do
       {:ok, record}
