@@ -142,6 +142,17 @@ defmodule ChatWebsocket.RoomChannel do
     end
   end
 
+  def handle_in("room:activate", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, room_state} <- UpdateState.call(room.id, user, "active"),
+         :ok <- broadcast!(socket, "room:active", room) do
+      reply(:ok, %{room: room_state}, socket)
+    else
+      _ -> reply(:error, "Error reactivating room", socket)
+    end
+  end
+
   defp broadcast_user_subscriptions!(subscriptions) do
     Enum.map(subscriptions, fn (subscription) ->
       broadcast_user_event!(subscription.user, "user:current:subscription:updated", subscription)
