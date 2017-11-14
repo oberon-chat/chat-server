@@ -1,6 +1,7 @@
 defmodule ChatServer.UpdateRoom do
   require Logger
 
+  alias ChatServer.BroadcastEvent
   alias ChatServer.Schema
 
   defmodule State do

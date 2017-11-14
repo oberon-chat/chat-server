@@ -135,7 +135,9 @@ defmodule ChatWebsocket.RoomChannel do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, room_state} <- UpdateRoom.call(room.id, user, "archived"),
-         :ok <- broadcast!(socket, "room:archived", room) do
+         :ok <- broadcast!(socket, "room:archived", room),
+         subscriptions <- ListSubscriptions.call(room),
+         :ok <- broadcast_user_subscriptions!(subscriptions) do
       reply(:ok, %{room: room_state}, socket)
     else
       _ -> reply(:error, "Error archiving room", socket)
@@ -146,7 +148,9 @@ defmodule ChatWebsocket.RoomChannel do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, room_state} <- UpdateRoom.call(room.id, user, "active"),
-         :ok <- broadcast!(socket, "room:active", room) do
+         :ok <- broadcast!(socket, "room:active", room),
+         subscriptions <- ListSubscriptions.call(room),
+         :ok <- broadcast_user_subscriptions!(subscriptions) do
       reply(:ok, %{room: room_state}, socket)
     else
       _ -> reply(:error, "Error reactivating room", socket)
