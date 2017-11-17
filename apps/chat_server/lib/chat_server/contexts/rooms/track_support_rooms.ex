@@ -22,7 +22,9 @@ defmodule ChatServer.TrackSupportRooms do
     case Map.get(list(), key(room)) do
       nil ->
         Presence.track(pid, @presence_key, key(room), %{
-          slug: room.slug
+          slug: room.slug,
+          type: room.type,
+          state: room.state
         })
       _data ->
         Logger.warn "Support room already tracked #{room.slug}" <> inspect(pid)

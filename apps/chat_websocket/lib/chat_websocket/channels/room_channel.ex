@@ -11,6 +11,7 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.GetSubscription
   alias ChatServer.ListSubscriptions
   alias ChatServer.Room
+  alias ChatServer.TrackSupportRooms
   alias ChatServer.UpdateMessage
   alias ChatServer.UpdateRoom
   alias ChatServer.UpdateSubscription
@@ -134,13 +135,21 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("room:archive", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, room_state} <- UpdateRoom.call(room.id, user, "archived"),
-         :ok <- broadcast!(socket, "room:archived", room),
-         subscriptions <- ListSubscriptions.call(room),
+    with {:ok, record} <- UpdateRoom.call(room.id, user, "archived"),
+         :ok <- broadcast!(socket, "room:archived", record),
+         {:ok, _} <- maybe_update_support_presence(record),
+         subscriptions <- ListSubscriptions.call(record),
          :ok <- broadcast_user_subscriptions!(subscriptions) do
-      reply(:ok, %{room: room_state}, socket)
+      reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error archiving room", socket)
+    end
+  end
+
+  defp maybe_update_support_presence(room) do
+    case room.type do
+      "support" -> TrackSupportRooms.update(room, %{state: room.state})
+      _ -> {:ok, true}
     end
   end
 
