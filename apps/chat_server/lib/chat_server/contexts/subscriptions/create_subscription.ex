@@ -20,6 +20,7 @@ defmodule ChatServer.CreateSubscription do
       |> Enum.into(%{})
       |> Map.put(:room, room)
       |> Map.put(:user, user)
+      |> Map.put(:viewed_at, DateTime.utc_now)
 
     with {:ok, subscription} <- Schema.Subscription.create(params),
          subscription <- Repo.preload(subscription, [:room, :user]),
