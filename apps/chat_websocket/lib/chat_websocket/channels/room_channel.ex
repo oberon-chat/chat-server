@@ -156,11 +156,12 @@ defmodule ChatWebsocket.RoomChannel do
   def handle_in("room:activate", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
-    with {:ok, room_state} <- UpdateRoom.call(room.id, user, "active"),
-         :ok <- broadcast!(socket, "room:active", room),
-         subscriptions <- ListSubscriptions.call(room),
+    with {:ok, record} <- UpdateRoom.call(room.id, user, "active"),
+         :ok <- broadcast!(socket, "room:active", record),
+         {:ok, _} <- maybe_update_support_presence(record),
+         subscriptions <- ListSubscriptions.call(record),
          :ok <- broadcast_user_subscriptions!(subscriptions) do
-      reply(:ok, %{room: room_state}, socket)
+      reply(:ok, %{room: record}, socket)
     else
       _ -> reply(:error, "Error reactivating room", socket)
     end
