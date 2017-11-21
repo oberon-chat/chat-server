@@ -15,10 +15,10 @@ defmodule ChatServer.UpdateRoom do
 
     # TODO verify user is allowed to update room of that type
 
-    with record <- Schema.Room.get(room_id),
+    with {:ok, record} <- GetRoom(room_id),
          {:ok, record} <- update(record, state),
-         :ok <- broadcast_update(record) do
-      {:ok, record}
+          :ok <- broadcast_update(record) do
+         {:ok, record}
     else
       _ -> :error
     end

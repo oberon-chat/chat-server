@@ -137,7 +137,7 @@ defmodule ChatWebsocket.RoomChannel do
 
     with {:ok, record} <- UpdateRoom.call(room.id, user, "archived"),
          :ok <- broadcast!(socket, "room:archived", record),
-         {:ok, _} <- maybe_update_support_presence(record),
+         {:ok, _} <- maybe_update_support_room_presence(record),
          subscriptions <- ListSubscriptions.call(record),
          :ok <- broadcast_user_subscriptions!(subscriptions) do
       reply(:ok, %{room: record}, socket)
@@ -146,19 +146,12 @@ defmodule ChatWebsocket.RoomChannel do
     end
   end
 
-  defp maybe_update_support_presence(room) do
-    case room.type do
-      "support" -> TrackSupportRooms.update(room, %{state: room.state})
-      _ -> {:ok, true}
-    end
-  end
-
-  def handle_in("room:activate", _params, socket) do
+  def handle_in("room:reactivate", _params, socket) do
     %{room: room, user: user} = socket.assigns
 
     with {:ok, record} <- UpdateRoom.call(room.id, user, "active"),
          :ok <- broadcast!(socket, "room:active", record),
-         {:ok, _} <- maybe_update_support_presence(record),
+         {:ok, _} <- maybe_update_support_room_presence(record),
          subscriptions <- ListSubscriptions.call(record),
          :ok <- broadcast_user_subscriptions!(subscriptions) do
       reply(:ok, %{room: record}, socket)
@@ -173,6 +166,13 @@ defmodule ChatWebsocket.RoomChannel do
     end)
 
     :ok
+  end
+
+  defp maybe_update_support_room_presence(room) do
+    case room.type do
+      "support" -> TrackSupportRooms.update(room, %{state: room.state})
+      _ -> {:ok, true}
+    end
   end
 
   # Filters
