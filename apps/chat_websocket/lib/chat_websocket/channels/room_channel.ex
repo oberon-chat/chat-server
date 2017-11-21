@@ -11,7 +11,9 @@ defmodule ChatWebsocket.RoomChannel do
   alias ChatServer.GetSubscription
   alias ChatServer.ListSubscriptions
   alias ChatServer.Room
+  alias ChatServer.TrackSupportRooms
   alias ChatServer.UpdateMessage
+  alias ChatServer.UpdateRoom
   alias ChatServer.UpdateSubscription
   alias ChatServer.ViewSubscription
 
@@ -130,12 +132,47 @@ defmodule ChatWebsocket.RoomChannel do
     end
   end
 
+  def handle_in("room:archive", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, record} <- UpdateRoom.call(room.id, user, "archived"),
+         :ok <- broadcast!(socket, "room:archived", record),
+         {:ok, _} <- maybe_update_support_room_presence(record),
+         subscriptions <- ListSubscriptions.call(record),
+         :ok <- broadcast_user_subscriptions!(subscriptions) do
+      reply(:ok, %{room: record}, socket)
+    else
+      _ -> reply(:error, "Error archiving room", socket)
+    end
+  end
+
+  def handle_in("room:reactivate", _params, socket) do
+    %{room: room, user: user} = socket.assigns
+
+    with {:ok, record} <- UpdateRoom.call(room.id, user, "active"),
+         :ok <- broadcast!(socket, "room:active", record),
+         {:ok, _} <- maybe_update_support_room_presence(record),
+         subscriptions <- ListSubscriptions.call(record),
+         :ok <- broadcast_user_subscriptions!(subscriptions) do
+      reply(:ok, %{room: record}, socket)
+    else
+      _ -> reply(:error, "Error reactivating room", socket)
+    end
+  end
+
   defp broadcast_user_subscriptions!(subscriptions) do
     Enum.map(subscriptions, fn (subscription) ->
       broadcast_user_event!(subscription.user, "user:current:subscription:updated", subscription)
     end)
 
     :ok
+  end
+
+  defp maybe_update_support_room_presence(room) do
+    case room.type do
+      "support" -> TrackSupportRooms.update(room, %{state: room.state})
+      _ -> {:ok, true}
+    end
   end
 
   # Filters
