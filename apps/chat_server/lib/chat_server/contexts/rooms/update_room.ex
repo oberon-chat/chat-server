@@ -3,6 +3,7 @@ defmodule ChatServer.UpdateRoom do
 
   alias ChatServer.BroadcastEvent
   alias ChatServer.Schema
+  alias ChatServer.GetRoom
 
   defmodule State do
     @derive {Poison.Encoder, only: [room: [:id, :slug, :name]]}
@@ -15,7 +16,7 @@ defmodule ChatServer.UpdateRoom do
 
     # TODO verify user is allowed to update room of that type
 
-    with {:ok, record} <- GetRoom(room_id),
+    with {:ok, record} <- GetRoom.call(room_id),
          {:ok, record} <- update(record, state),
           :ok <- broadcast_update(record) do
          {:ok, record}
