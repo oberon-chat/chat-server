@@ -19,7 +19,7 @@ defmodule ChatServer.UpdateRoom do
     with {:ok, record} <- GetRoom.call(room_id),
          {:ok, record} <- update(record, state),
          :ok <- broadcast_update(record) do
-           {:ok, record}
+      {:ok, record}
     else
       _ -> :error
     end
